@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Power Runtime Planner | The Blackout Brief</title>
+<meta name="description" content="Free calculator from The Blackout Brief: see how long your generator, batteries and solar can keep your fridge, freezer, Wi-Fi and well pump running in an outage. Nothing you enter is stored.">
+<meta property="og:title" content="Power Runtime Planner | The Blackout Brief">
+<meta property="og:description" content="How long can your backup power keep things running? Free, private, no sign-up.">
+<meta name="theme-color" content="#14160F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='20' fill='%2314160F'/%3E%3Cpath d='M14 60 L60 20 L106 60' fill='none' stroke='%23E8E4D8' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M28 52 V102 H92 V52' fill='none' stroke='%23E8E4D8' stroke-width='10' stroke-linejoin='round'/%3E%3Crect x='46' y='62' width='28' height='28' rx='2' fill='%23E8A33D'/%3E%3C/svg%3E">
+<style>html,body{margin:0;background:#14160F}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+.bbp {
+  
+  --bg: #14160F; --panel: #1F2318; --card: #272C1F; --line: #3A4030;
+  --text: #E8E4D8; --muted: #9E9C92; --accent: #E8A33D; --accent2: #F2BE6A;
+  --winter: #7FB8E0; --summer: #E8A33D; --good: #7CC48A; --warn: #E8A33D; --bad: #E06A5A;
+  --radius: 6px;
+  --display: "Oswald", "Bahnschrift SemiCondensed", "Bahnschrift", "Arial Narrow", sans-serif;
+}
+.bbp, .bbp * { box-sizing: border-box; }
+.bbp { margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; }
+.bbp button { font: inherit; color: inherit; cursor: pointer; }
+.bbp h1, .bbp h2, .bbp h3 { margin: 0; font-weight: 650; }
+.bbp .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 18px;
+  padding: 12px 24px; background: #0F110B; border-bottom: 2px solid var(--accent); }
+.bbp .logo { display: flex; align-items: center; gap: 12px; flex: none; }
+.bbp .wordmark { display: flex; flex-direction: column; font-family: var(--display); font-weight: 700;
+  font-size: 21px; line-height: 1; text-transform: uppercase; color: var(--text); }
+.bbp .wordmark .brief { color: var(--accent); letter-spacing: 4px; }
+.bbp .divider { width: 1px; height: 44px; background: var(--line); }
+.bbp .titles h1 { font-size: 22px; font-family: var(--display); text-transform: uppercase; letter-spacing: .5px; font-weight: 650; }
+.bbp .panel-head h2, .bbp .rb-head h2 { font-family: var(--display); text-transform: uppercase; letter-spacing: .5px; }
+.bbp .sub { margin: 2px 0 0; color: var(--muted); }
+.bbp .actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.bbp .save-status { color: var(--muted); font-size: 13px; margin-right: 6px; }
+.bbp .save-status.ok { color: var(--good); }
+.bbp .save-status.err { color: var(--bad); }
+.bbp .btn { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; }
+.bbp .btn:hover { border-color: var(--accent); }
+.bbp .btn.primary { background: var(--accent); color: #14160F; border-color: var(--accent); font-weight: 650; }
+.bbp .btn.danger { color: var(--bad); }
+.bbp .link { background: none; border: none; color: var(--accent2); padding: 0; }
+.bbp .link:hover { text-decoration: underline; }
+.bbp main { max-width: 1240px; margin: 0 auto; padding: 22px 24px 40px; }
+.bbp .runtime-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.bbp .runtime-box { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; border-top: 4px solid var(--winter); min-height: 190px; }
+.bbp .runtime-box.summer { border-top-color: var(--summer); }
+.bbp .rb-head { display: flex; gap: 12px; align-items: center; }
+.bbp .rb-icon { font-size: 28px; }
+.bbp .rb-head h2 { font-size: 18px; }
+.bbp .rb-sub { color: var(--muted); font-size: 13px; }
+.bbp .rb-body { margin-top: 12px; }
+.bbp .rb-empty { color: var(--muted); padding: 22px 0; }
+.bbp .big { font-size: 44px; font-weight: 750; line-height: 1.1; }
+.bbp .winter .big { color: var(--winter); }
+.bbp .summer .big { color: var(--summer); }
+.bbp .big.unlimited { color: var(--good) !important; }
+.bbp .big.zero { color: var(--bad) !important; }
+.bbp .loc-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0;
+  border-bottom: 1px solid var(--line); }
+.bbp .loc-row:last-of-type { border-bottom: none; }
+.bbp .loc-name { font-weight: 600; }
+.bbp .loc-row .big { font-size: 30px; }
+.bbp .notes { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 13.5px; }
+.bbp .notes li { margin: 2px 0; }
+.bbp .stats { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--muted); }
+.bbp .stats b { color: var(--text); font-weight: 600; }
+.bbp .warnings { margin-top: 16px; background: #2B2614; border: 1px solid #5C4A1C; border-radius: var(--radius); padding: 12px 16px; }
+.bbp .warnings h3 { font-size: 14px; color: var(--warn); margin-bottom: 4px; }
+.bbp .warnings ul { margin: 0; padding-left: 18px; font-size: 13.5px; }
+.bbp .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-top: 18px; }
+.bbp .panel-head { display: flex; justify-content: space-between; align-items: center; }
+.bbp .panel-head h2 { font-size: 19px; }
+.bbp .hint { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+.bbp .add-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--accent);
+  color: #14160F; font-size: 28px; font-weight: 700; line-height: 1; box-shadow: 0 2px 8px #0006; }
+.bbp .add-btn:hover { background: var(--accent2); }
+.bbp .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; margin-top: 14px; }
+.bbp .empty { color: var(--muted); font-style: italic; padding: 8px 2px; grid-column: 1 / -1; }
+.bbp .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; cursor: pointer; position: relative; }
+.bbp .card:hover { border-color: var(--accent); }
+.bbp .card .ctype { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent2); }
+.bbp .card .cname { font-weight: 650; font-size: 15.5px; margin: 2px 0 4px; }
+.bbp .card .cline { color: var(--muted); font-size: 13px; }
+.bbp .card .loc { position: absolute; top: 10px; right: 12px; font-size: 11px; background: #171A11; border: 1px solid var(--line); border-radius: 20px; padding: 1px 8px; color: var(--muted); }
+.bbp .card.t-generator { border-left: 4px solid #e07a3f; }
+.bbp .card.t-battery { border-left: 4px solid var(--good); }
+.bbp .card.t-module { border-left: 4px solid var(--accent); }
+.bbp .card.t-inverter { border-left: 4px solid #a98bf5; }
+.bbp .card.t-load { border-left: 4px solid var(--winter); }
+.bbp .modal { position: fixed; inset: 0; background: #000a; display: grid; place-items: center; z-index: 20; }
+.bbp .modal[hidden] { display: none; }
+.bbp .modal-card { width: min(680px, 94vw); max-height: 90vh; display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 60px #000c; }
+.bbp .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.bbp .x { background: none; border: none; font-size: 26px; color: var(--muted); line-height: 1; }
+.bbp .modal-body { padding: 16px 20px; overflow: auto; }
+.bbp .modal-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--line); }
+.bbp .modal-foot .spacer { flex: 1; }
+.bbp .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.bbp .choice { background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 18px 12px; text-align: center; }
+.bbp .choice:hover { border-color: var(--accent); }
+.bbp .choice .ci { font-size: 34px; display: block; }
+.bbp .choice b { display: block; margin-top: 6px; font-size: 16px; }
+.bbp .choice small { color: var(--muted); display: block; margin-top: 4px; }
+.bbp .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+.bbp .grid .full { grid-column: 1 / -1; }
+.bbp .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.bbp .field .help { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.bbp .field input, .bbp .field select { width: 100%; padding: 8px 10px; background: #171A11; color: var(--text);
+  border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+.bbp .field input:focus, .bbp .field select:focus { outline: none; border-color: var(--accent); }
+.bbp .field input[type=checkbox] { width: auto; margin-right: 6px; }
+.bbp .section-label { grid-column: 1 / -1; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line);
+  font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent2); }
+.bbp .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.bbp .seg button { background: #171A11; border: none; padding: 7px 12px; color: var(--muted); }
+.bbp .seg button.on { background: var(--accent); color: #14160F; font-weight: 650; }
+.bbp .callout { background: #171A11; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--muted); }
+.bbp .help-text h4 { margin: 14px 0 4px; color: var(--accent2); }
+.bbp .help-text p, .bbp .help-text li { color: var(--muted); }
+.bbp .foot { margin-top: 22px; display: flex; justify-content: space-between; color: var(--muted); font-size: 12.5px; gap: 12px; flex-wrap: wrap; }
+@media (max-width: 820px) {
+.bbp .runtime-row { grid-template-columns: 1fr; }
+.bbp .grid { grid-template-columns: 1fr; }
+}
+.bbp .req { color: var(--accent); font-weight: 500; font-size: 12px; }
+.bbp optgroup { color: var(--accent2); font-style: normal; }
+.bbp option { color: var(--text); }
+.bbp .bcard { border-top: 4px solid var(--accent); }
+.bbp .bc-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; max-width: 640px; }
+.bbp .bc-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 8px; }
+.bbp .bc-stat { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+.bbp .bc-stat span { display: block; font-size: 13px; color: var(--muted); }
+.bbp .bc-stat b { display: block; font-size: 22px; font-family: var(--display); letter-spacing: .3px; margin-top: 2px; }
+.bbp .bc-head { margin: 18px 0 2px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent2); }
+.bbp .bc-head:first-child { margin-top: 14px; }
+.bbp .bc-note { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+.bbp .bc-warn { background: #2B2614; border: 1px solid #5C4A1C; border-radius: 6px; padding: 9px 12px; margin-top: 8px; font-size: 14px; }
+.bbp .bc-warn b { color: var(--accent); }
+.bbp .bc-ok { background: #1C2A1E; border: 1px solid #36573A; border-radius: 6px; padding: 9px 12px; margin-top: 8px; font-size: 14px; color: #CDE8CF; }
+.bbp .bc-fine { color: var(--muted); font-size: 12px; margin: 16px 0 0; }
+.bbp .preset-tip { margin-top: 6px; }
+.bbp { -webkit-text-size-adjust: 100%; }
+.bbp .field input, .bbp .field select { font-size: 16px; min-height: 44px; }
+.bbp .btn, .bbp .add-btn, .bbp .seg button { min-height: 44px; }
+.bbp .demo-note { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+@media (max-width: 700px) {
+.bbp .topbar { flex-wrap: wrap; gap: 10px 14px; padding: 10px max(14px, env(safe-area-inset-left)) 10px; }
+.bbp .divider, .bbp .titles .sub, .bbp .save-status { display: none; }
+.bbp .wordmark { font-size: 17px; }
+.bbp .logo svg { width: 40px; height: 40px; }
+.bbp .titles { order: 3; width: 100%; }
+.bbp .titles h1 { font-size: 18px; }
+.bbp .actions { gap: 6px; }
+.bbp .actions .btn { padding: 8px 10px; font-size: 14px; }
+.bbp .actions .lbl { display: none; }
+.bbp main { padding: 14px 12px 40px; }
+.bbp .runtime-box { padding: 14px 14px; min-height: 0; }
+.bbp .big { font-size: clamp(34px, 11vw, 44px); }
+.bbp .panel { padding: 14px; }
+.bbp .cards { grid-template-columns: minmax(0, 1fr); }
+.bbp .modal { place-items: end center; }
+.bbp .modal-card { width: 100vw; max-height: 92vh; border-radius: 16px 16px 0 0; }
+.bbp .modal-foot { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+.bbp .grid { grid-template-columns: minmax(0, 1fr); }
+.bbp .choices { grid-template-columns: minmax(0, 1fr); }
+.bbp .choice { padding: 14px; text-align: left; display: grid; grid-template-columns: 44px 1fr; align-items: center; column-gap: 10px; }
+.bbp .choice .ci { grid-row: span 2; font-size: 30px; }
+.bbp .choice b { margin: 0; }
+.bbp .foot { flex-direction: column; }
+}
+@media (max-width: 700px) {
+.bbp .bc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.bbp .bc-stat b { font-size: 19px; }
+.bbp .bc-controls { grid-template-columns: minmax(0, 1fr); }
+}
+
+.bbp { box-sizing: border-box; border-radius: 10px; overflow: hidden; text-align: left; line-height: 1.45; }
+.bbp *, .bbp *::before, .bbp *::after { box-sizing: border-box; }
+.bbp .topbar { position: relative; }
+.bbp .modal { z-index: 2147483000; }
+.bbp button { font-family: inherit; }
+.bbp h1, .bbp h2, .bbp h3, .bbp h4 { color: var(--text); margin: 0; line-height: 1.2; letter-spacing: normal; text-transform: none; font-weight: 650; }
+.bbp .titles h1 { font-size: 22px; } .bbp .panel-head h2, .bbp .rb-head h2 { font-size: 18px; }
+.bbp .titles h1, .bbp .panel-head h2, .bbp .rb-head h2 { text-transform: uppercase; letter-spacing: .5px; font-family: var(--display); }
+.bbp .modal-head h3 { font-size: 18px; } .bbp .help-text h4 { font-size: 15px; color: var(--accent2); margin: 14px 0 4px; }
+.bbp p, .bbp li, .bbp label, .bbp span, .bbp div { font-family: inherit; }
+.bbp p { margin: 0; } .bbp .help-text p { margin: 4px 0; } .bbp ul, .bbp ol { margin: 6px 0; padding-left: 20px; }
+.bbp { font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; font-size: 15px; color: var(--text); background: var(--bg); }
+.bbp input, .bbp select { box-shadow: none; }
+@media (max-width: 700px) { .bbp .titles h1 { font-size: 18px; } }
+.bbp [hidden] { display: none !important; }
+.bbp a.bbp-back { color: var(--muted); text-decoration: none; font-size: 13px; position: absolute; top: 6px; left: 24px; }
+.bbp a.bbp-back:hover { color: var(--accent); }
+.bbp .topbar { padding-top: 26px; }
+@media (max-width: 700px) { .bbp a.bbp-back { left: 14px; } }
+</style>
+<div class="bbp">
+<header class="topbar">
+  <div class="logo" aria-label="The Blackout Brief">
+    <svg width="54" height="54" viewBox="0 0 120 120" aria-hidden="true"><path d="M14 60 L60 20 L106 60" fill="none" stroke="#E8E4D8" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 52 V102 H92 V52" fill="none" stroke="#E8E4D8" stroke-width="9" stroke-linejoin="round"/><rect x="46" y="62" width="28" height="28" rx="2" fill="#E8A33D"/></svg>
+    <div class="wordmark"><span>The Blackout</span><span class="brief">Brief</span></div>
+  </div>
+  <div class="divider"></div>
+  <a class="bbp-back" href="https://blackout-brief-c7dc37.beehiiv.com/">← The Blackout Brief</a>
+  <div class="titles">
+    <h1>Power Runtime Planner</h1>
+    <p class="sub">How long can your backup power keep things running?</p>
+  </div>
+  <div class="actions">
+    <span id="bbp-saveStatus" class="save-status" hidden></span>
+    <button id="bbp-settingsBtn" class="btn">⚙<span class="lbl"> Settings</span></button>
+    <button id="bbp-helpBtn" class="btn">?<span class="lbl"> How it works</span></button>
+  </div>
+</header>
+
+<main>
+  <p class="demo-note">An example setup is loaded — tap any card to change it, or + to add your own gear. Pick your nearest city on the solar panels so sun hours fit where you live.</p>
+  <section class="runtime-row">
+    <div class="runtime-box winter" id="bbp-boxWinter">
+      <div class="rb-head"><span class="rb-icon">❄️</span><div><h2>Shortest day</h2><div class="rb-sub">Winter solstice · <span class="sunline"></span></div></div></div>
+      <div class="rb-body"></div>
+    </div>
+    <div class="runtime-box summer" id="bbp-boxSummer">
+      <div class="rb-head"><span class="rb-icon">☀️</span><div><h2>Longest day</h2><div class="rb-sub">Summer solstice · <span class="sunline"></span></div></div></div>
+      <div class="rb-body"></div>
+    </div>
+  </section>
+
+  <div id="bbp-warnings" class="warnings" hidden></div>
+
+  <section class="panel bcard" id="bbp-backupCard">
+    <div class="panel-head">
+      <div><h2>Your Backup Card</h2><p class="hint">A one-day snapshot: what your gear can run, for how long, and what to watch for.</p></div>
+    </div>
+    <div class="bc-controls">
+      <div class="field"><label for="bbp-bcWeather">Weather</label>
+        <select id="bbp-bcWeather">
+          <option value="summer">Typical summer day</option>
+          <option value="winter">Typical winter day</option>
+          <option value="cloudy">Cloudy day</option>
+          <option value="storm">Storm or ice day</option>
+        </select></div>
+      <div class="field"><label for="bbp-bcGenHours">Hours you'll run the generator per day</label>
+        <input id="bbp-bcGenHours" type="number" min="0" max="24" step="0.5"></div>
+    </div>
+    <div id="bbp-bcBody"></div>
+    <p class="bc-fine">Numbers are estimates — check your own labels and manuals, or better yet, measure with a plug-in watt meter. Never backfeed a house through an outlet: hard-wired devices like well pumps and whole-house generator hookups need a transfer switch or interlock kit installed by an electrician. Run generators outdoors only, far from doors and windows, and keep a battery CO alarm inside. From The Blackout Brief.</p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><h2>Loads</h2><p class="hint">Things you want to keep running during an outage.</p></div>
+      <button class="add-btn" id="bbp-addLoad" title="Add a load">+</button>
+    </div>
+    <div id="bbp-loadList" class="cards"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><h2>Power Supplies</h2><p class="hint">Generators, batteries and solar you can use.</p></div>
+      <button class="add-btn" id="bbp-addSupply" title="Add a power supply">+</button>
+    </div>
+    <div id="bbp-supplyList" class="cards"></div>
+  </section>
+  <footer class="foot">
+    <span id="bbp-filePath">🔒 Nothing you enter is saved or sent anywhere. Refresh the page to start over. Want to keep your plan? Get the free Windows app from The Blackout Brief.</span>
+    <span><button class="link" id="bbp-loadExample">Load the example</button> · <button class="link" id="bbp-startBlank">Start blank</button></span>
+  </footer>
+</main>
+
+<div id="bbp-modal" class="modal" hidden>
+  <div class="modal-card">
+    <div class="modal-head"><h3 id="bbp-modalTitle"></h3><button class="x" id="bbp-modalClose" title="Close">×</button></div>
+    <div id="bbp-modalBody" class="modal-body"></div>
+    <div class="modal-foot" id="bbp-modalFoot"></div>
+  </div>
+</div>
+
+</div>
+<script>
+(function () {
+var BBP = {};
+/* Nearest-city list for offline sun estimates: [City, ST, latitude] */
+const CITIES = [
+['Powhatan','VA',37.54],['Richmond','VA',37.54],['Virginia Beach','VA',36.85],['Norfolk','VA',36.85],['Roanoke','VA',37.27],['Charlottesville','VA',38.03],['Lynchburg','VA',37.41],['Fredericksburg','VA',38.30],['Harrisonburg','VA',38.45],['Arlington','VA',38.88],['Winchester','VA',39.19],['Blacksburg','VA',37.23],['Danville','VA',36.59],['Farmville','VA',37.30],
+['Washington','DC',38.90],['Baltimore','MD',39.29],['Hagerstown','MD',39.64],['Salisbury','MD',38.36],['Dover','DE',39.16],['Wilmington','DE',39.74],
+['Charleston','WV',38.35],['Morgantown','WV',39.63],['Huntington','WV',38.42],
+['Raleigh','NC',35.78],['Charlotte','NC',35.23],['Greensboro','NC',36.07],['Asheville','NC',35.60],['Wilmington','NC',34.23],['Boone','NC',36.22],
+['Columbia','SC',34.00],['Charleston','SC',32.78],['Greenville','SC',34.85],
+['Atlanta','GA',33.75],['Savannah','GA',32.08],['Augusta','GA',33.47],['Macon','GA',32.84],
+['Jacksonville','FL',30.33],['Tallahassee','FL',30.44],['Orlando','FL',28.54],['Tampa','FL',27.95],['Miami','FL',25.76],['Pensacola','FL',30.42],['Fort Myers','FL',26.64],['Gainesville','FL',29.65],
+['Birmingham','AL',33.52],['Montgomery','AL',32.37],['Mobile','AL',30.69],['Huntsville','AL',34.73],
+['Jackson','MS',32.30],['Gulfport','MS',30.37],['Tupelo','MS',34.26],
+['New Orleans','LA',29.95],['Baton Rouge','LA',30.45],['Shreveport','LA',32.53],['Lafayette','LA',30.22],
+['Nashville','TN',36.16],['Memphis','TN',35.15],['Knoxville','TN',35.96],['Chattanooga','TN',35.05],
+['Louisville','KY',38.25],['Lexington','KY',38.04],['Bowling Green','KY',36.99],
+['Little Rock','AR',34.75],['Fayetteville','AR',36.06],
+['Philadelphia','PA',39.95],['Pittsburgh','PA',40.44],['Harrisburg','PA',40.27],['Allentown','PA',40.61],['Erie','PA',42.13],['Scranton','PA',41.41],
+['Newark','NJ',40.74],['Trenton','NJ',40.22],['Atlantic City','NJ',39.36],
+['New York','NY',40.71],['Albany','NY',42.65],['Buffalo','NY',42.89],['Rochester','NY',43.16],['Syracuse','NY',43.05],
+['Hartford','CT',41.76],['Providence','RI',41.82],['Boston','MA',42.36],['Worcester','MA',42.26],['Springfield','MA',42.10],
+['Concord','NH',43.21],['Burlington','VT',44.48],['Portland','ME',43.66],['Bangor','ME',44.80],
+['Columbus','OH',39.96],['Cleveland','OH',41.50],['Cincinnati','OH',39.10],['Toledo','OH',41.65],['Dayton','OH',39.76],
+['Indianapolis','IN',39.77],['Fort Wayne','IN',41.08],['Evansville','IN',37.97],
+['Chicago','IL',41.88],['Springfield','IL',39.78],['Peoria','IL',40.69],
+['Detroit','MI',42.33],['Grand Rapids','MI',42.96],['Lansing','MI',42.73],['Marquette','MI',46.54],['Traverse City','MI',44.76],
+['Milwaukee','WI',43.04],['Madison','WI',43.07],['Green Bay','WI',44.51],
+['Minneapolis','MN',44.98],['Duluth','MN',46.79],['Rochester','MN',44.02],
+['Des Moines','IA',41.59],['Cedar Rapids','IA',41.98],
+['St. Louis','MO',38.63],['Kansas City','MO',39.10],['Springfield','MO',37.21],
+['Fargo','ND',46.88],['Bismarck','ND',46.81],['Sioux Falls','SD',43.55],['Rapid City','SD',44.08],
+['Omaha','NE',41.26],['Lincoln','NE',40.81],['North Platte','NE',41.12],
+['Wichita','KS',37.69],['Topeka','KS',39.05],['Dodge City','KS',37.75],
+['Oklahoma City','OK',35.47],['Tulsa','OK',36.15],
+['Dallas','TX',32.78],['Houston','TX',29.76],['San Antonio','TX',29.42],['Austin','TX',30.27],['El Paso','TX',31.76],['Amarillo','TX',35.22],['Lubbock','TX',33.58],['Corpus Christi','TX',27.80],['Midland','TX',32.00],
+['Albuquerque','NM',35.08],['Santa Fe','NM',35.69],['Las Cruces','NM',32.32],
+['Denver','CO',39.74],['Colorado Springs','CO',38.83],['Grand Junction','CO',39.06],['Durango','CO',37.28],
+['Salt Lake City','UT',40.76],['St. George','UT',37.10],
+['Phoenix','AZ',33.45],['Tucson','AZ',32.22],['Flagstaff','AZ',35.20],
+['Las Vegas','NV',36.17],['Reno','NV',39.53],['Elko','NV',40.83],
+['Boise','ID',43.62],['Idaho Falls','ID',43.49],['Coeur d\'Alene','ID',47.68],
+['Billings','MT',45.78],['Missoula','MT',46.87],['Great Falls','MT',47.50],
+['Cheyenne','WY',41.14],['Casper','WY',42.87],
+['Seattle','WA',47.61],['Spokane','WA',47.66],['Yakima','WA',46.60],
+['Portland','OR',45.52],['Eugene','OR',44.05],['Bend','OR',44.06],['Medford','OR',42.33],
+['Los Angeles','CA',34.05],['San Diego','CA',32.72],['San Francisco','CA',37.77],['Sacramento','CA',38.58],['Fresno','CA',36.74],['Redding','CA',40.59],['Bakersfield','CA',35.37],
+['Anchorage','AK',61.22],['Fairbanks','AK',64.84],['Juneau','AK',58.30],
+['Honolulu','HI',21.31],['Hilo','HI',19.72],
+['San Juan','PR',18.47],
+['Toronto','ON',43.65],['Ottawa','ON',45.42],['Montreal','QC',45.50],['Vancouver','BC',49.28],['Calgary','AB',51.05],['Winnipeg','MB',49.90],['Halifax','NS',44.65]
+];
+
+/* Blackout Power Planner — runtime math. Works in the app and in Node (for testing). */
+(function (root) {
+  const RAD = Math.PI / 180;
+
+  // Assumptions, explained in plain words in the app's "How the math works" panel
+  const K = {
+    inverterEff: 0.88,      // battery DC -> household AC
+    solarDerate: 0.80,      // heat, dirt, wiring, charge-controller losses
+    coldVocFactor: 1.12,    // panel voltage rises on cold mornings (~14°F)
+    genMaxLoad: 0.80,       // don't plan to run a generator past 80% of its running watts
+    motorSurge: 3,          // motors briefly pull ~3x their running watts when starting
+    ktWinter: 0.45,         // share of sunshine that gets through clouds (typical mid-latitude)
+    ktSummer: 0.55,
+    usable: { lifepo4: 0.90, nmc: 0.85, leadacid: 0.50 }
+  };
+
+  // ---- Sun hours from latitude (offline estimate, isotropic sky model) ----
+  function sunForDay(lat, tiltDeg, shortest) {
+    const phiAbs = Math.min(Math.abs(lat), 66);
+    const phi = phiAbs * RAD;
+    const decl = (shortest ? -23.45 : 23.45) * RAD;
+    const beta = Math.max(0, Math.min(90, tiltDeg)) * RAD;
+    const ws = Math.acos(Math.max(-1, Math.min(1, -Math.tan(phi) * Math.tan(decl))));
+    const e0 = shortest ? 1.033 : 0.967;
+    const h0 = (24 / Math.PI) * 1.367 * e0 *
+      (Math.cos(phi) * Math.cos(decl) * Math.sin(ws) + ws * Math.sin(phi) * Math.sin(decl));
+    const kt = shortest ? K.ktWinter : K.ktSummer;
+    const H = h0 * kt;
+    const pb = phi - beta;
+    const wsT = Math.min(ws, Math.acos(Math.max(-1, Math.min(1, -Math.tan(pb) * Math.tan(decl)))));
+    const rbNum = Math.cos(pb) * Math.cos(decl) * Math.sin(wsT) + wsT * Math.sin(pb) * Math.sin(decl);
+    const rbDen = Math.cos(phi) * Math.cos(decl) * Math.sin(ws) + ws * Math.sin(phi) * Math.sin(decl);
+    const rb = Math.max(0, rbNum / rbDen);
+    const fd = 1.391 - 3.56 * kt + 4.189 * kt * kt - 2.137 * kt * kt * kt;
+    const ht = H * ((1 - fd) * rb + fd * (1 + Math.cos(beta)) / 2 + 0.2 * (1 - Math.cos(beta)) / 2);
+    return { sunHours: Math.max(0, ht), daylight: (24 * ws) / Math.PI };
+  }
+
+  const n = (v) => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
+  const qty = (o) => Math.max(1, Math.round(n(o.qty) || 1));
+
+  function loadDaily(l) {
+    if (l.mode === 'kwh') return n(l.kwhPerDay) * 1000 * qty(l);
+    return n(l.watts) * Math.min(24, n(l.hours)) * qty(l);
+  }
+  function loadRunningW(l) {
+    if (l.mode === 'kwh') return (n(l.watts) || (n(l.kwhPerDay) * 1000) / 24) * qty(l);
+    return n(l.watts) * qty(l);
+  }
+  function loadHours(l) { return l.mode === 'kwh' ? 24 : Math.min(24, n(l.hours)); }
+  function appliesTo(l, season) { return !l.season || l.season === 'both' || l.season === season; }
+
+  function storageOf(s) {
+    if (s.type === 'battery') return n(s.wh) * (K.usable[s.chem || 'lifepo4'] || 0.9) * qty(s);
+    if (s.type === 'inverter') return n(s.bankWh) * (K.usable[s.chem || 'lifepo4'] || 0.9);
+    return 0;
+  }
+  function supplyVolts(s) { return String(s.voltage || '120'); }
+
+  // Solar panels attached to one battery/inverter: checks + capped daily energy
+  function solarForDevice(dev, modules, sunHours) {
+    const warnings = [];
+    let arrayW = 0;
+    modules.forEach((m) => {
+      const count = Math.max(1, Math.round(n(m.qty) || 1));
+      const series = Math.max(1, Math.round(n(m.series) || 1));
+      const strings = Math.floor(count / series);
+      const leftover = count - strings * series;
+      const name = m.name || 'Solar panels';
+      arrayW += n(m.watts) * strings * series;
+      if (leftover > 0) warnings.push(`${name}: ${leftover} panel(s) don't fit evenly into strings of ${series}, so they're not counted.`);
+      const stringVoc = n(m.voc) * series * K.coldVocFactor;
+      if (n(dev.pvMaxV) && stringVoc > n(dev.pvMaxV))
+        warnings.push(`${name}: ${series} in series can reach about ${stringVoc.toFixed(0)}V on a cold morning, over the ${n(dev.pvMaxV)}V limit of ${dev.name || 'the device'}. That can damage it — wire fewer in series.`);
+      const stringVmp = n(m.vmp) * series;
+      if (n(dev.pvMinV) && n(m.vmp) && stringVmp < n(dev.pvMinV))
+        warnings.push(`${name}: ${series} in series makes about ${stringVmp.toFixed(0)}V, below the ${n(dev.pvMinV)}V the device needs to start charging. Wire more in series.`);
+      const inputs = Math.max(1, Math.round(n(dev.mppt) || 1));
+      const ampsPerInput = (n(m.isc) * strings) / inputs;
+      if (n(dev.pvMaxA) && n(m.isc) && ampsPerInput > n(dev.pvMaxA) * 1.0001)
+        warnings.push(`${name}: about ${ampsPerInput.toFixed(1)}A per solar input, over the ${n(dev.pvMaxA)}A limit. Most units just limit the extra (you lose some power), but check the manual.`);
+    });
+    const deviceCap = n(dev.pvMaxW) * (dev.type === 'battery' ? qty(dev) : 1);
+    const usedW = deviceCap ? Math.min(arrayW, deviceCap) : arrayW;
+    if (deviceCap && arrayW > deviceCap)
+      warnings.push(`${dev.name || 'Device'}: ${arrayW.toFixed(0)}W of panels on a ${deviceCap.toFixed(0)}W solar input — the extra is clipped on sunny days (this is normal "over-paneling" and helps in winter).`);
+    return { arrayW, usedW, acWh: usedW * sunHours * K.solarDerate * K.inverterEff, warnings };
+  }
+
+  // How many evenly spaced generator runs a day the battery needs to bridge the gaps
+  function runsNeeded(avgW, genH, solarWh, storeWh) {
+    const gapWh = Math.max(avgW * (24 - genH) - solarWh, 0);
+    if (gapWh <= 0) return 1;
+    if (storeWh <= 0) return Infinity;
+    return Math.max(1, Math.ceil(gapWh / storeWh));
+  }
+  function runTimes(k) {
+    if (!isFinite(k) || k < 2 || k > 6) return '';
+    const fmtT = (h) => { const hh = Math.floor(h) % 24, mm = Math.round((h % 1) * 60); const ap = hh < 12 ? 'AM' : 'PM'; const h12 = hh % 12 || 12; return mm ? `${h12}:${String(mm).padStart(2, '0')} ${ap}` : `${h12} ${ap}`; };
+    const t = []; for (let i = 0; i < k; i++) t.push(fmtT(7 + (24 / k) * i));
+    return t.length === 2 ? t.join(' and ') : t.slice(0, -1).join(', ') + ' and ' + t[t.length - 1];
+  }
+  const fmtH = (h) => h >= 1 ? `${(Math.round(h * 2) / 2).toString()} hr${h >= 1.5 ? 's' : ''}` : `${Math.max(15, Math.round(h * 60 / 15) * 15)} min`;
+
+  function fmtDays(d) {
+    if (d === Infinity) return 'Unlimited';
+    if (d >= 365) return '1 year +';
+    if (d >= 2) return `${d.toFixed(d < 10 ? 1 : 0)} days`;
+    const h = d * 24;
+    if (h >= 1) return `${h.toFixed(h < 10 ? 1 : 0)} hours`;
+    return `${Math.round(h * 60)} minutes`;
+  }
+
+  // Runtime for one location on one solstice day
+  function runtimeFor(loads, supplies, sun, season) {
+    const L = loads.filter((l) => appliesTo(l, season));
+    const E = L.reduce((a, l) => a + loadDaily(l), 0);
+    const notes = [];
+    const warnings = [];
+    const peakW = L.reduce((a, l) => a + loadRunningW(l), 0);
+    const motorBiggest = L.filter((l) => l.motor).reduce((a, l) => Math.max(a, n(l.surge) || loadRunningW(l) / qty(l) * K.motorSurge), 0);
+    const motorRun = L.filter((l) => l.motor).reduce((a, l) => Math.max(a, loadRunningW(l) / qty(l)), 0);
+    const surgeW = peakW - motorRun + motorBiggest;
+    const maxHours = L.reduce((a, l) => Math.max(a, loadHours(l)), 0);
+    const needs240 = L.some((l) => l.voltage === '240');
+
+    const stores = supplies.filter((s) => s.type === 'battery' || s.type === 'inverter');
+    const gens = supplies.filter((s) => s.type === 'generator');
+    const mods = supplies.filter((s) => s.type === 'module');
+
+    const storeWh = stores.reduce((a, s) => a + storageOf(s), 0) * K.inverterEff;
+    const invW = stores.reduce((a, s) => a + n(s.contW) * (s.type === 'battery' ? qty(s) : 1), 0);
+    const invSurge = stores.reduce((a, s) => a + (n(s.surgeW) || n(s.contW)) * (s.type === 'battery' ? qty(s) : 1), 0);
+    const chargeW = stores.reduce((a, s) => a + n(s.acChargeW) * (s.type === 'battery' ? qty(s) : 1), 0);
+
+    let solarWh = 0, arrayW = 0;
+    stores.forEach((dev) => {
+      const attached = mods.filter((m) => m.attachTo === dev.id);
+      if (!attached.length) return;
+      const r = solarForDevice(dev, attached, sun.sunHours);
+      solarWh += r.acWh; arrayW += r.arrayW;
+      warnings.push(...r.warnings);
+    });
+    const orphan = mods.filter((m) => !stores.some((s) => s.id === m.attachTo));
+    if (orphan.length) warnings.push('Some solar panels aren\'t connected to a battery or off-grid inverter here, so they aren\'t counted. Edit them and pick what they plug into.');
+
+    const genHoursTotal = gens.reduce((a, g) => {
+      const tank = n(g.tankGal), hpt = n(g.hoursPerTank);
+      if (!tank || !hpt) return a;
+      return a + hpt * (tank + n(g.spareGal)) / tank;
+    }, 0);
+    const genFuel = gens.reduce((a, g) => a + n(g.tankGal) + n(g.spareGal), 0);
+    const bigGen = gens.reduce((a, g) => Math.max(a, n(g.runW)), 0);
+    const bigGenSurge = gens.reduce((a, g) => Math.max(a, n(g.surgeW) || n(g.runW)), 0);
+    if (gens.some((g) => !n(g.tankGal) || !n(g.hoursPerTank)))
+      warnings.push('A generator is missing its tank size or hours per tank, so its fuel isn\'t counted.');
+
+    // Can the equipment carry the load at all?
+    if (stores.length && invW && peakW > invW && peakW > bigGen)
+      warnings.push(`Everything on at once is about ${peakW.toFixed(0)}W, more than your batteries can output (${invW.toFixed(0)}W). Stagger big loads.`);
+    if (stores.length && invSurge && surgeW > invSurge && surgeW > bigGenSurge)
+      warnings.push(`A motor starting up could pull about ${surgeW.toFixed(0)}W for a second, more than the battery's surge rating (${invSurge.toFixed(0)}W).`);
+    if (!stores.length && gens.length && peakW > bigGen * K.genMaxLoad)
+      warnings.push(`Loads (${peakW.toFixed(0)}W) are more than 80% of the generator's running watts. Stagger big loads.`);
+    if (needs240) {
+      const has240 = supplies.some((s) => /240/.test(supplyVolts(s)) && s.type !== 'module');
+      if (!has240) warnings.push('You have a 240V load (like a well pump) but no power supply that makes 240V.');
+    }
+
+    const res = { E, peakW, surgeW, solarWh, arrayW, storeWh, genHoursTotal, genFuel, days: 0, notes, warnings, genHoursPerDay: 0, battDays: 0 };
+    if (!L.length) { res.days = Infinity; res.empty = true; notes.push('No loads run in this season.'); return res; }
+    if (E <= 0) { res.days = Infinity; notes.push('Loads use no energy yet — add watts and hours.'); return res; }
+
+    const net = E - solarWh;
+    if (storeWh > 0) {
+      if (net <= 0) {
+        res.days = Infinity;
+        notes.push(`Solar covers your daily use (${(solarWh / 1000).toFixed(2)} kWh made vs ${(E / 1000).toFixed(2)} kWh used) — as long as the sun cooperates.`);
+        return res;
+      }
+      res.battDays = storeWh / net;
+      if (solarWh > 0) notes.push(`Solar covers about ${Math.round((solarWh / E) * 100)}% of each day's use.`);
+      notes.push(`Batteries last about ${fmtDays(res.battDays)} before needing help.`);
+      if (genHoursTotal > 0 && bigGen > 0) {
+        const avgW = E / 24;
+        const rate = Math.min(bigGen * K.genMaxLoad, chargeW + avgW);
+        res.genHoursPerDay = Math.min(24, net / rate);
+        if (net / rate > 24) notes.push('Even running the generator all day can\'t keep up with this load.');
+        const genDays = genHoursTotal / res.genHoursPerDay;
+        res.days = res.battDays + genDays;
+        notes.push(`Then run the generator about ${res.genHoursPerDay.toFixed(1)} hrs/day to recharge — your ${genFuel.toFixed(1)} gal of fuel adds ${fmtDays(genDays)}.`);
+        const k = runsNeeded(E / 24, res.genHoursPerDay, solarWh, storeWh);
+        res.runsPerDay = k;
+        if (k > 1 && isFinite(k)) {
+          const each = res.genHoursPerDay / k;
+          if (each < 0.5) notes.push(`Your battery is small for this load — it can only carry about ${fmtH(storeWh / (E / 24))} between runs, so the generator would need to start ${k} times a day. A bigger battery or a shorter list makes this practical.`);
+          else notes.push(`Split that into ${k} runs of about ${fmtH(each)} each, spaced evenly${runTimes(k) ? ' (for example ' + runTimes(k) + ')' : ''}. Your battery can only carry about ${fmtH(storeWh / (E / 24))} on its own between runs.`);
+        }
+        if (!chargeW) notes.push('Tip: enter each battery\'s max AC charging watts — the generator can refill it faster and burn less fuel.');
+      } else {
+        res.days = res.battDays;
+      }
+      return res;
+    }
+    // No battery: generator must run whenever loads run
+    if (genHoursTotal > 0) {
+      res.genHoursPerDay = maxHours || 24;
+      res.days = genHoursTotal / res.genHoursPerDay;
+      notes.push(`With no battery, the generator runs whenever something is on (about ${res.genHoursPerDay.toFixed(0)} hrs/day). Fuel on hand: ${genFuel.toFixed(1)} gal.`);
+      if (mods.length) notes.push('Solar panels need a battery or off-grid inverter to be useful here.');
+      return res;
+    }
+    res.days = 0;
+    notes.push(mods.length ? 'Solar panels need a battery or off-grid inverter to store power — add one.' : 'Add a battery or generator to see runtime.');
+    return res;
+  }
+
+  function locationsOf(state) {
+    const set = [];
+    [...state.loads, ...state.supplies].forEach((x) => {
+      const loc = (x.location || 'Home').trim() || 'Home';
+      if (!set.includes(loc)) set.push(loc);
+    });
+    return set;
+  }
+
+  function solarForSeason(settings, shortest) {
+    const lat = n(settings.lat) || 38;
+    const tilt = settings.tilt === '' || settings.tilt == null ? Math.abs(lat) : n(settings.tilt);
+    const s = sunForDay(lat, tilt, shortest);
+    const ov = shortest ? settings.sunWinterOverride : settings.sunSummerOverride;
+    if (n(ov) > 0) s.sunHours = n(ov), s.overridden = true;
+    return s;
+  }
+
+  function computeAll(state) {
+    const out = {};
+    ['winter', 'summer'].forEach((season) => {
+      const sun = solarForSeason(state.settings || {}, season === 'winter');
+      const noCity = !(state.settings && (state.settings.city || parseFloat(state.settings.lat)));
+      const hasPanels = state.supplies.some((s) => s.type === 'module');
+      // All loads and supplies are treated as one circuit
+      const supplies = noCity && hasPanels ? state.supplies.filter((s) => s.type !== 'module') : state.supplies;
+      const r = runtimeFor(state.loads, supplies, sun, season);
+      if (noCity && hasPanels) r.warnings.unshift('Solar isn\'t counted yet — open your solar panels and choose the nearest city. It\'s needed to figure out how much sun you get.');
+      out[season] = { sun, locs: [{ loc: 'All', ...r }] };
+    });
+    return out;
+  }
+
+  // ---- Backup Card: a one-day snapshot of the plan (from the Blackout Brief Backup Card Calculator) ----
+  function fmtHrs(h) {
+    if (!isFinite(h)) return 'No load';
+    if (h >= 48) return (h / 24).toFixed(1) + ' days';
+    if (h >= 1) return h.toFixed(1) + ' hours';
+    return Math.round(h * 60) + ' minutes';
+  }
+  function backupCard(state, opts) {
+    const season = opts.season, sunHours = opts.sunHours, gh = Math.max(0, Math.min(24, n(opts.genHours)));
+    const L = state.loads.filter((l) => appliesTo(l, season) && loadDaily(l) > 0);
+    const S = state.supplies;
+    const motorStart = (l) => (n(l.surge) || (loadRunningW(l) / qty(l)) * K.motorSurge);
+    const gulpOf = (list) => {
+      const peak = list.reduce((a, l) => a + loadRunningW(l), 0);
+      const extra = list.filter((l) => l.motor).reduce((a, l) => Math.max(a, motorStart(l) - loadRunningW(l) / qty(l)), 0);
+      return { peak, gulp: peak + extra };
+    };
+    const daily = L.reduce((a, l) => a + loadDaily(l), 0);
+    const { peak, gulp } = gulpOf(L);
+    const stores = S.filter((s) => s.type === 'battery' || s.type === 'inverter');
+    const mult = (s) => (s.type === 'battery' ? qty(s) : 1);
+    const usable = stores.reduce((a, s) => a + storageOf(s), 0) * K.inverterEff;
+    const out = stores.reduce((a, s) => a + n(s.contW) * mult(s), 0);
+    const surgeLim = stores.reduce((a, s) => a + (n(s.surgeW) || n(s.contW)) * mult(s), 0);
+    const chg = stores.reduce((a, s) => a + n(s.acChargeW) * mult(s), 0);
+    const bat240 = stores.some((s) => /240/.test(supplyVolts(s)));
+    const hasBat = usable > 0;
+    // Loads the battery can actually run (240V ones only if it makes 240V)
+    const BL = L.filter((l) => bat240 || l.voltage !== '240');
+    const skipped = L.length - BL.length;
+    const bDaily = BL.reduce((a, l) => a + loadDaily(l), 0), bAvg = bDaily / 24;
+    const bg = gulpOf(BL);
+    // Solar for the chosen weather
+    let solarWh = 0, pvRaw = 0, pvCap = 0;
+    const cityOk = !!(state.settings && (state.settings.city || n(state.settings.lat)));
+    if (cityOk) stores.forEach((dev) => {
+      const mods = S.filter((m) => m.type === 'module' && m.attachTo === dev.id);
+      if (!mods.length) return;
+      const r = solarForDevice(dev, mods, sunHours);
+      solarWh += r.acWh; pvRaw += r.arrayW; pvCap += n(dev.pvMaxW) * mult(dev);
+    });
+    // Generator plan uses your biggest generator
+    const gens = S.filter((g) => g.type === 'generator' && n(g.runW) > 0);
+    const g = gens.sort((a, b) => n(b.runW) - n(a.runW))[0];
+    const gRun = g ? n(g.runW) : 0, gStart = g ? (n(g.surgeW) || gRun) : 0;
+    const gph = g && n(g.tankGal) && n(g.hoursPerTank) ? n(g.tankGal) / n(g.hoursPerTank) : 0;
+    const gen240 = g ? /240/.test(supplyVolts(g)) : false;
+    const fuelOnHand = g ? n(g.tankGal) + n(g.spareGal) : 0;
+    const hasGen = gRun > 0 && gh > 0;
+
+    const card = { empty: !daily, avg: daily / 24, daily, peak, gulp, sections: [], warns: [], oks: [], genName: g ? (g.name || 'Generator') : '' };
+    if (!daily) return card;
+    const fmt = (x) => Math.round(x).toLocaleString();
+
+    if (hasBat && bAvg > 0) {
+      card.sections.push({ title: 'Battery alone', stats: [['Usable in your bucket', fmt(usable) + ' Wh'], ['Battery alone lasts about', fmtHrs(usable / bAvg)]],
+        note: skipped ? 'Battery numbers leave out 240 V devices it can\'t run.' : '' });
+      if (solarWh > 0) {
+        const net = bDaily - solarWh;
+        card.sections.push({ title: 'Battery + solar', stats: [['Solar adds per day', fmt(solarWh) + ' Wh'], ['Battery + solar lasts about', net <= 0 ? 'Keeps up on days like this' : fmtHrs(usable / (net / 24))]] });
+        if (pvCap && pvRaw > pvCap) card.warns.push(`<b>Extra panels:</b> you have ${fmt(pvRaw)} W of panels, but your battery only accepts ${fmt(pvCap)} W of solar. On bright days the extra sits idle — though it helps on cloudy ones.`);
+      }
+    }
+    if (hasGen) {
+      const offH = 24 - gh, needBat = Math.max(bAvg * offH - solarWh, 0), fuel = gph * gh;
+      // Generator hours the energy math needs (same as the runtime boxes)
+      const netB = bDaily - solarWh, rate = Math.min(gRun * K.genMaxLoad, chg + bAvg);
+      const reqH = hasBat && netB > 0 && rate > 0 ? Math.min(24, netB / rate) : 0;
+      const k = hasBat ? runsNeeded(bAvg, gh, solarWh, usable) : 1;
+      const each = gh / k;
+      const st = [['Fuel per day', gph ? fuel.toFixed(1) + ' gal' : 'Add tank & hours'], ['Fuel for 3 days', gph ? (fuel * 3).toFixed(1) + ' gal' : '—']];
+      if (gph && fuelOnHand) st.push(['Your fuel lasts', fmtHrs((fuelOnHand / fuel) * 24)]);
+      if (hasBat && isFinite(k)) st.push(['Runs per day', k === 1 ? '1 run' : `${k} runs of ~${fmtH(each)}`]);
+      if (hasBat) st.push(['Battery must cover each gap', fmt(isFinite(k) ? needBat / k : needBat) + ' Wh']);
+      card.sections.push({ title: `Generator plan (${gh} hours a day${gens.length > 1 ? ', ' + card.genName : ''})`, stats: st });
+      if (hasBat) {
+        if (gh + 0.05 < reqH) card.warns.push(`<b>Not enough generator time:</b> to put back what you use, the generator needs about ${reqH.toFixed(1)} hours a day — you've planned ${gh}. Run it longer or trim the list.`);
+        else if (k > 1 && each < 0.5) card.warns.push(`<b>Battery too small for the gaps:</b> it holds ${fmt(usable)} Wh, only about ${fmtH(usable / bAvg)} of this load. Even split up, the generator would need ${k} short starts a day. A bigger battery or a shorter list fixes this.`);
+        else if (k > 1) card.warns.push(`<b>Split it up:</b> ${gh} hours a day is enough, but not in one block — your battery can't carry the ${fmt(needBat)} Wh it would need to get through a ${offH}-hour gap (it holds ${fmt(usable)} Wh). Run it in <b>${k} runs of about ${fmtH(each)}</b>, spaced evenly${runTimes(k) ? ' — for example ' + runTimes(k) : ''}.`);
+        else card.oks.push('Your battery can carry the load between generator runs.');
+        const refill = chg * gh;
+        if (chg && refill < needBat && !(gh + 0.05 < reqH)) card.warns.push(`<b>Slow refill:</b> at ${fmt(chg)} W of charging, ${gh} hours of generator puts back only about ${fmt(refill)} Wh. Run longer or charge faster.`);
+        if (peak + chg > gRun) card.warns.push(`<b>Generator overloaded:</b> running everything (${fmt(peak)} W) while charging the battery (${fmt(chg)} W) is more than the generator's ${fmt(gRun)} running watts. Stagger the big loads.`);
+      } else {
+        card.warns.push('<b>No battery:</b> everything stops when the generator stops. Fridges and freezers can coast a few hours closed; Wi-Fi and lights can\'t.');
+        if (peak > gRun) card.warns.push(`<b>Generator overloaded:</b> your list pulls ${fmt(peak)} W, more than its ${fmt(gRun)} running watts. Stagger the big loads.`);
+      }
+      if (gStart && gulp > gStart) card.warns.push(`<b>Big gulp vs. generator:</b> the worst start-up could hit ${fmt(gulp)} W, more than its ${fmt(gStart)} starting watts. Start big motors one at a time.`);
+    }
+    L.forEach((l) => {
+      const nm = String(l.name || 'A device').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+      if (l.voltage === '240') {
+        if (!bat240 && !(hasGen && gen240)) card.warns.push(`<b>Needs 240 V:</b> ${nm}. Nothing in your plan has a 240 V outlet. Plan on a 240 V generator or battery with a transfer switch or interlock kit, installed by an electrician.`);
+        else if (!bat240 && hasGen && gen240 && hasBat) card.warns.push(`<b>Generator-only device:</b> ${nm} needs 240 V, so it only runs while the generator runs. Fill tubs and jugs while it's on.`);
+      }
+      const w = loadRunningW(l) / qty(l);
+      if (hasBat && out && w > out && !(l.voltage === '240' && !bat240)) card.warns.push(`<b>Too big for your battery:</b> ${nm} (${fmt(w)} W) is over the ${fmt(out)} W output limit. Run it on the generator, or not at all.`);
+    });
+    if (hasBat && out && bg.peak > out) card.warns.push(`<b>Don't run everything on the battery at once.</b> Together the devices it can run pull ${fmt(bg.peak)} W, more than the ${fmt(out)} W limit. Take turns.`);
+    if (hasBat && surgeLim && bg.gulp > surgeLim) card.warns.push(`<b>Big gulp vs. battery:</b> the worst start-up could hit ${fmt(bg.gulp)} W, more than the ${fmt(surgeLim)} W surge limit. Start big motors one at a time.`);
+    if (hasBat && !hasGen && bAvg > 0 && solarWh < bDaily && usable / bAvg < 24) card.warns.push('<b>Less than a day.</b> To stretch it, add solar, run a generator in blocks to refill it, or cut the list down to what truly matters.');
+    if (!hasBat && !gRun) card.warns.push('<b>No power source yet.</b> Add a battery or generator.');
+    if (!card.warns.length && !card.oks.length) card.oks.push('Your plan covers this list. Now test it for real: charge the battery full, plug everything in, and check the percentage after a few hours.');
+    return card;
+  }
+
+  const api = { K, sunForDay, runtimeFor, computeAll, fmtDays, locationsOf, loadDaily, backupCard, solarForSeason };
+  root.Calc = api;
+})(BBP);
+
+var Calc = BBP.Calc;
+/* Blackout Power Planner — UI */
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const hasApi = false; // web version: nothing is ever saved
+
+  const EXAMPLE = {"version": 1, "settings": {"city": "", "lat": "", "tilt": "", "cardWeather": "winter", "genHours": 4}, "loads": [{"id": "e1", "name": "Refrigerator (full size)", "mode": "watts", "watts": "150", "hours": "8", "qty": "1", "motor": true, "season": "both", "voltage": "120"}, {"id": "e2", "name": "Chest freezer", "mode": "watts", "watts": "70", "hours": "24", "qty": "1", "motor": true, "season": "both", "voltage": "120"}, {"id": "e3", "name": "Wi-Fi router + modem", "mode": "watts", "watts": "20", "hours": "24", "qty": "1", "motor": false, "season": "both", "voltage": "120"}, {"id": "e4", "name": "LED lights (a few rooms)", "mode": "watts", "watts": "30", "hours": "6", "qty": "1", "motor": false, "season": "both", "voltage": "120"}, {"id": "e5", "name": "Phone & tablet charging", "mode": "watts", "watts": "15", "hours": "4", "qty": "1", "motor": false, "season": "both", "voltage": "120"}], "supplies": [{"id": "e6", "type": "battery", "name": "Mid-size power station (about 1,000 Wh)", "qty": "1", "chem": "lifepo4", "wh": "1024", "contW": "1000", "surgeW": "2000", "voltage": "120", "acChargeW": "800", "mppt": "1", "pvMaxW": "400", "pvMaxV": "60", "pvMinV": "12", "pvMaxA": "13"}, {"id": "e7", "type": "module", "name": "200 W folding / suitcase panel", "attachTo": "e6", "qty": "2", "series": "1", "watts": "200", "voc": "24", "isc": "11", "vmp": "20"}, {"id": "e8", "type": "generator", "name": "Mid inverter generator (about 3,500 W)", "fuel": "gas", "tankGal": "2.3", "hoursPerTank": "7.5", "runW": "3000", "surgeW": "3500", "voltage": "120", "spareGal": "10"}]};
+  let state = { version: 1, settings: { city: '', lat: '', tilt: '', sunWinterOverride: '', sunSummerOverride: '' }, loads: [], supplies: [] };
+
+  // ---------- Common loads (typical numbers — your own meter readings are better) ----------
+  // [group, name, running watts, hours/day, has motor, volts, season]
+  const PRESETS = [
+    ['Food storage', 'Refrigerator (full size)', 150, 8, true, '120'],
+    ['Food storage', 'Refrigerator (older / side-by-side)', 250, 10, true, '120'],
+    ['Food storage', 'Mini fridge', 80, 8, true, '120'],
+    ['Food storage', 'Chest freezer', 70, 24, true, '120'],
+    ['Food storage', 'Upright freezer', 120, 10, true, '120'],
+    ['Water', 'Well pump (1/2 HP)', 750, 1, true, '240'],
+    ['Water', 'Well pump (1 HP)', 1200, 1, true, '240'],
+    ['Water', 'Sump pump (1/3 HP)', 800, 1, true, '120'],
+    ['Water', 'Sump pump (1/2 HP)', 1050, 1, true, '120'],
+    ['Heating & cooling', 'Electric space heater', 1500, 4, false, '120', 'winter'],
+    ['Heating & cooling', 'Electric space heater (low setting)', 750, 6, false, '120', 'winter'],
+    ['Heating & cooling', 'Electric blanket', 100, 8, false, '120', 'winter'],
+    ['Heating & cooling', 'Gas furnace blower', 500, 8, true, '120', 'winter'],
+    ['Heating & cooling', 'Pellet stove', 120, 12, true, '120', 'winter'],
+    ['Heating & cooling', 'Wood stove blower fan', 60, 12, true, '120', 'winter'],
+    ['Heating & cooling', 'Window air conditioner', 700, 8, true, '120', 'summer'],
+    ['Heating & cooling', 'Box fan', 60, 8, true, '120', 'summer'],
+    ['Heating & cooling', 'Dehumidifier', 300, 8, true, '120'],
+    ['Medical', 'CPAP machine', 40, 8, false, '120'],
+    ['Medical', 'CPAP with heated humidifier', 90, 8, false, '120'],
+    ['Medical', 'Oxygen concentrator', 300, 24, true, '120'],
+    ['Medical', 'Medication fridge (insulin)', 60, 10, true, '120'],
+    ['Communication', 'Wi-Fi router + modem', 20, 24, false, '120'],
+    ['Communication', 'Starlink', 50, 24, false, '120'],
+    ['Communication', 'Phone & tablet charging', 15, 4, false, '120'],
+    ['Communication', 'Ham / mesh / weather radio', 10, 24, false, '120'],
+    ['Communication', 'Laptop', 60, 4, false, '120'],
+    ['Communication', 'Desktop computer + monitor', 200, 4, false, '120'],
+    ['Lighting & safety', 'LED lights (a few rooms)', 30, 6, false, '120'],
+    ['Lighting & safety', 'Security cameras', 15, 24, false, '120'],
+    ['Lighting & safety', 'Garage door opener', 500, 0.1, true, '120'],
+    ['Entertainment', 'TV (LED, 40–55")', 80, 4, false, '120'],
+    ['Entertainment', 'TV (large, 65"+)', 150, 4, false, '120'],
+    ['Entertainment', 'Streaming box / game console', 100, 3, false, '120'],
+    ['Kitchen', 'Microwave', 1000, 0.25, false, '120'],
+    ['Kitchen', 'Coffee maker', 900, 0.25, false, '120'],
+    ['Kitchen', 'Electric kettle', 1500, 0.2, false, '120'],
+    ['Kitchen', 'Slow cooker', 200, 6, false, '120'],
+    ['Kitchen', 'Induction hot plate', 1200, 1, false, '120'],
+    ['Household', 'Washing machine', 500, 1, true, '120'],
+    ['Household', 'Aquarium pump & heater', 100, 24, false, '120']
+  ];
+
+  // ---------- Gear presets (from The Blackout Brief Backup Card Calculator) ----------
+  const GEAR = {
+    battery: [
+      ['Small power station (about 300 Wh)', { wh: 300, contW: 300, surgeW: 600, voltage: '120', pvMaxW: 200, acChargeW: 300, chem: 'lifepo4' }, 'Phones, lights, Wi-Fi, a CPAP for a night or two. Too small for a fridge for long.'],
+      ['Mid-size power station (about 1,000 Wh)', { wh: 1024, contW: 1000, surgeW: 2000, voltage: '120', pvMaxW: 400, acChargeW: 800, chem: 'lifepo4' }, 'The most common size. Runs a fridge or a couple of freezers for hours, not days.'],
+      ['Large power station (about 2,000 Wh)', { wh: 2048, contW: 2000, surgeW: 4000, voltage: '120', pvMaxW: 800, acChargeW: 1500, chem: 'lifepo4' }, 'Handles a fridge and freezer for most of a day. Often expandable with add-on batteries.'],
+      ['Large 240 V power station (about 3,600 Wh)', { wh: 3600, contW: 3600, surgeW: 7200, voltage: '120/240', pvMaxW: 2400, acChargeW: 1800, chem: 'lifepo4' }, 'Some big stations offer 240 V, alone or paired. That can run a well pump through a transfer switch.'],
+      ['Installed home battery (about 13.5 kWh)', { wh: 13500, contW: 5000, surgeW: 10000, voltage: '120/240', pvMaxW: '', acChargeW: 5000, chem: 'lifepo4' }, 'Wall-mounted systems tied into your panel, usually refilled by rooftop solar. Output limits vary a lot by brand and setup.'],
+      ['12 V lithium (LiFePO4) 100 Ah + 1,000 W inverter', { wh: 1280, contW: 1000, surgeW: 2000, voltage: '120', pvMaxW: 300, acChargeW: 240, chem: 'lifepo4' }, 'About 1,280 Wh. Lithium can use nearly all its capacity, minus about 10–12% lost in the inverter. Solar needs a charge controller. Use pure sine wave for fridges and pumps.'],
+      ['12 V lead-acid / AGM 100 Ah + 1,000 W inverter', { wh: 1200, contW: 1000, surgeW: 2000, voltage: '120', pvMaxW: 200, acChargeW: 120, chem: 'leadacid' }, 'About 1,200 Wh on paper, but draining lead-acid below half shortens its life, so only about 45% is really usable after inverter losses.']
+    ],
+    generator: [
+      ['Small inverter generator (about 2,200 W)', { runW: 1800, surgeW: 2200, voltage: '120', tankGal: 1.1, hoursPerTank: 5.5, fuel: 'gas' }, 'Quiet and fuel-sipping. Great for charging a power station and running a fridge. Not for well pumps or whole-house hookups.'],
+      ['Mid inverter generator (about 3,500 W)', { runW: 3000, surgeW: 3500, voltage: '120', tankGal: 2.3, hoursPerTank: 7.5, fuel: 'gas' }, 'Runs a fridge, freezers, and a microwave (not all at once). Most are 120 V only; check yours.'],
+      ['Portable generator (about 7,000 W)', { runW: 5500, surgeW: 7000, voltage: '120/240', tankGal: 6.5, hoursPerTank: 13, fuel: 'gas' }, 'Usually has a 240 V outlet that can feed the house through an interlock kit or transfer switch. Louder and thirstier than an inverter generator.'],
+      ['Large portable generator (about 9,000 W)', { runW: 7000, surgeW: 9000, voltage: '120/240', tankGal: 8, hoursPerTank: 13, fuel: 'gas' }, 'Can run a well pump plus the basics through a transfer switch. Fuel adds up fast, so run it in blocks.'],
+      ['Home standby generator, propane (about 20 kW)', { runW: 20000, surgeW: 30000, voltage: '120/240', tankGal: 400, hoursPerTank: 165, fuel: 'propane' }, 'Installed, starts on its own. Assumes a 500-gal propane tank filled to 80%; fuel use climbs with load, so check your unit\'s spec sheet.']
+    ],
+    module: [
+      ['100 W folding / suitcase panel', { watts: 100 }, 'Easy to carry, but small. Good for phones, lights, and topping off a small station.'],
+      ['200 W folding / suitcase panel', { watts: 200 }, 'The common portable size. Light enough to carry and aim at the sun.'],
+      ['400 W folding panel', { watts: 400 }, 'Big and heavy for a portable panel. Check that your station can take this many watts.'],
+      ['Rigid house-type panel (300–400 W)', { watts: 350 }, 'The same panels used on roofs. Cheap per watt, but heavy, and you need a stand. Check your station\'s voltage limit before wiring them in series.']
+    ]
+  };
+  const GEN_HINT = ' Runtime per tank is a rough figure at about half load — your manual lists the real number.';
+  const LOAD_TIPS = [
+    [/refrigerator|fridge/i, 'Running draw is often 100–250 W. The compressor cycles on and off, so 8–12 hours a day of running is typical. Start-up jolt is often 800–1,500 W.'],
+    [/freezer/i, 'Often 60–150 W while running, on and off through the day. Keep it full and closed — a full freezer holds cold much longer.'],
+    [/well pump/i, 'Many well pumps are 240 V and hard-wired, which usually means a generator plus a transfer switch or interlock, not a 120 V power station. The start-up jolt can be 2–3× running watts.'],
+    [/router|modem/i, 'Most modem and router pairs use 10–25 W together, all day. Small load, big comfort: news, weather alerts, and calls over Wi-Fi. Your provider\'s equipment down the street needs power too.'],
+    [/starlink/i, 'Works when local internet is down. Turn off snow-melt mode in an outage to save power.'],
+    [/\btv\b/i, 'LED TVs often use 30–200 W depending on size. Brightness matters, so turn it down. A big TV for 4 hours can use as much as a freezer does all day.'],
+    [/microwave/i, 'A "1,000 W" microwave usually means cooking power — it pulls about 1,400–1,600 W from the outlet. Look for "input" on the label inside the door.'],
+    [/space heater|heater/i, 'Electric heat is the biggest power hog in an outage. 1,500 W for an hour uses more than a fridge does all day. Heat one small room, not the house.'],
+    [/cpap|oxygen|medical|insulin/i, 'Medical loads come first. Know your device\'s battery or DC option, and keep a backup plan if power runs out.']
+  ];
+  const tipFor = (name) => { const t = LOAD_TIPS.find(([re]) => re.test(name || '')); return t ? t[1] : ''; };
+
+  // ---------- Field definitions ----------
+  const NAME = (ph) => ({ k: 'name', label: 'Name', type: 'text', ph, full: true });
+  const MAKE = { k: 'make', label: 'Manufacturer', type: 'text', ph: 'Brand' };
+  const MODEL = { k: 'model', label: 'Model', type: 'text', ph: 'Model number' };
+  const VOLT = { k: 'voltage', label: 'AC voltage', type: 'select', options: [['120', '120V'], ['240', '240V'], ['120/240', '120V and 240V']] };
+  const CHEM = { k: 'chem', label: 'Battery type', type: 'select', options: [['lifepo4', 'LiFePO4 / LFP (most power stations)'], ['nmc', 'Lithium NMC (older power stations)'], ['leadacid', 'Lead-acid / AGM']], help: 'Lead-acid should only be drained about halfway, so it counts as half its size.' };
+  const SOLAR_IN = [
+    { section: 'Solar input (on the spec sheet, often under "Solar" or "PV")' },
+    { k: 'mppt', label: 'Number of solar inputs (MPPT)', type: 'num', ph: '1', help: 'Separate solar ports/charge controllers. Most power stations have 1.' },
+    { k: 'pvMaxW', label: 'Max solar watts', type: 'num', unit: 'W', ph: '600' },
+    { k: 'pvMaxV', label: 'Max solar voltage (Voc)', type: 'num', unit: 'V', ph: '60', help: 'The most important limit — too much voltage can damage it.' },
+    { k: 'pvMinV', label: 'Min solar voltage to start', type: 'num', unit: 'V', ph: '12', help: 'Often the low number in a range like "12–60V".' },
+    { k: 'pvMaxA', label: 'Max solar amps (per input)', type: 'num', unit: 'A', ph: '20' }
+  ];
+
+  const DEFS = {
+    load: [
+      { k: 'preset', label: 'What is it?', type: 'preset', full: true },
+      NAME('e.g., Kitchen fridge'),
+      { k: 'qty', label: 'How many', type: 'num', ph: '1' },
+      { k: 'mode', label: 'How do you know its power use?', type: 'mode', full: true },
+      { k: 'watts', label: 'Watts while running', type: 'num', unit: 'W', ph: '150', help: 'On the label or in the manual. If it shows amps, multiply amps × 120.', show: (o) => o.mode !== 'kwh' },
+      { k: 'hours', label: 'Hours it runs per day', type: 'num', unit: 'hrs', ph: '8', help: 'Fridges and freezers cycle on and off — about 8 hrs/day is typical.', show: (o) => o.mode !== 'kwh' },
+      { k: 'kwhPerDay', label: 'Measured kWh per day', type: 'num', unit: 'kWh', ph: '1.5', help: 'From a plug-in meter (like a Kill A Watt): total kWh ÷ days measured.', show: (o) => o.mode === 'kwh' },
+      { k: 'watts', label: 'Running watts (optional)', type: 'num', unit: 'W', ph: '150', help: 'Used to check your inverter is big enough.', show: (o) => o.mode === 'kwh' },
+      { k: 'season', label: 'When do you need it?', type: 'select', options: [['both', 'All year'], ['winter', 'Winter only (e.g., heater)'], ['summer', 'Summer only (e.g., A/C)']] },
+      { k: 'voltage', label: 'Plug type', type: 'select', options: [['120', '120V — regular outlet'], ['240', '240V — big appliance / well pump']] },
+      { k: 'motor', label: 'Has a motor or compressor (fridge, freezer, pump, A/C)', type: 'check', full: true, help: 'Motors need a short burst of extra power to start — about 3× running watts.' }
+    ],
+    generator: [
+      { k: 'gear', type: 'gear', kind: 'generator', full: true },
+      NAME('e.g., Garage generator'), MAKE, MODEL,
+      { k: 'fuel', label: 'Fuel type', type: 'select', options: [['gas', 'Gasoline'], ['propane', 'Propane'], ['diesel', 'Diesel'], ['dual', 'Dual fuel']] },
+      { k: 'tankGal', label: 'Fuel tank capacity', type: 'num', unit: 'gal', ph: '2.3' },
+      { k: 'hoursPerTank', label: 'Average runtime per full tank', type: 'num', unit: 'hrs', ph: '11', help: 'Use the manual\'s number at 25–50% load, or your own experience.' },
+      { k: 'runW', label: 'Running watts', type: 'num', unit: 'W', ph: '3000' },
+      { k: 'surgeW', label: 'Surge / starting watts', type: 'num', unit: 'W', ph: '3500' },
+      VOLT,
+      { section: 'Extra fuel' },
+      { k: 'spareGal', label: 'Extra fuel on hand', type: 'num', unit: 'gal', ph: '0', help: 'Gas cans, spare propane tanks or diesel you\'d use to refill this generator. Counted in the runtime.' },
+      { k: 'spareNote', label: 'Where it\'s stored (optional)', type: 'text', ph: 'e.g., 4 × 6-gal cans in shed' }
+    ],
+    battery: [
+      { k: 'gear', type: 'gear', kind: 'battery', full: true },
+      NAME('e.g., Pecron E1000LFP'), MAKE, MODEL,
+      { k: 'qty', label: 'How many of this unit', type: 'num', ph: '1' },
+      CHEM,
+      { k: 'wh', label: 'Battery capacity', type: 'num', unit: 'Wh', ph: '1024', help: 'Watt-hours — the size of the "tank".' },
+      { k: 'contW', label: 'Output watts (continuous)', type: 'num', unit: 'W', ph: '1800', help: 'The most it can power at once.' },
+      { k: 'surgeW', label: 'Surge watts', type: 'num', unit: 'W', ph: '3000' },
+      VOLT,
+      { k: 'acChargeW', label: 'Max AC charging watts', type: 'num', unit: 'W', ph: '1000', help: 'How fast it refills from a wall outlet or generator.' },
+      ...SOLAR_IN
+    ],
+    module: [
+      { k: 'gear', type: 'gear', kind: 'module', full: true },
+      NAME('e.g., Roof-rack panels'), MAKE, MODEL,
+      { k: 'attachTo', label: 'Plugged into', type: 'attach', full: true },
+      { k: 'city', label: 'Nearest city', type: 'city', full: true },
+      { k: 'qty', label: 'Number of panels', type: 'num', ph: '2' },
+      { k: 'series', label: 'Panels wired in series per string', type: 'num', ph: '1', help: '1 = all in parallel. Series adds volts; parallel adds amps.' },
+      { k: 'watts', label: 'Panel watts (Pmax)', type: 'num', unit: 'W', ph: '320' },
+      { section: 'From the panel label (optional, but needed for safety checks)' },
+      { k: 'voc', label: 'Open-circuit voltage (Voc)', type: 'num', unit: 'V', ph: '45.3' },
+      { k: 'isc', label: 'Short-circuit current (Isc)', type: 'num', unit: 'A', ph: '9.2' },
+      { k: 'vmp', label: 'Max-power voltage (Vmp)', type: 'num', unit: 'V', ph: '37' },
+      { k: 'imp', label: 'Max-power current (Imp)', type: 'num', unit: 'A', ph: '8.6' }
+    ],
+    inverter: [
+      NAME('e.g., Shed off-grid system'), MAKE, MODEL,
+      { k: 'contW', label: 'Output watts (continuous)', type: 'num', unit: 'W', ph: '3000' },
+      { k: 'surgeW', label: 'Surge watts', type: 'num', unit: 'W', ph: '6000' },
+      VOLT,
+      { k: 'acChargeW', label: 'Max AC charging watts', type: 'num', unit: 'W', ph: '2400', help: 'Built-in charger, for refilling from a generator.' },
+      { section: 'Battery bank connected to it' },
+      { k: 'bankWh', label: 'Battery bank size', type: 'num', unit: 'Wh', ph: '5120', help: 'Volts × amp-hours. 48V × 100Ah = 4,800Wh.' },
+      CHEM,
+      ...SOLAR_IN
+    ]
+  };
+  const TYPE_LABEL = { load: 'Load', generator: 'Generator', battery: 'Battery', module: 'Solar panels', inverter: 'Off-grid inverter' };
+  const TYPE_ICON = { generator: '⛽', battery: '🔋', module: '☀️', inverter: '🔌', load: '💡' };
+
+  // ---------- Persistence ----------
+  let saveTimer = null, dirty = false;
+  function setStatus(text, cls) { const el = $('#bbp-saveStatus'); el.textContent = text; el.className = 'save-status ' + (cls || ''); }
+  function save() {}
+  function changed() { render(); }
+  async function load() { merge(JSON.parse(JSON.stringify(EXAMPLE))); }
+  function merge(d) {
+    state = { version: 1, settings: Object.assign({}, state.settings, d.settings || {}), loads: d.loads || [], supplies: d.supplies || [] };
+  }
+
+  // ---------- Rendering ----------
+  const num = (v, d = 0) => { const x = parseFloat(v); return isFinite(x) ? x.toLocaleString(undefined, { maximumFractionDigits: d }) : '—'; };
+
+  function render() {
+    renderLoads(); renderSupplies(); renderRuntime(); renderCard();
+  }
+
+  function renderLoads() {
+    const el = $('#bbp-loadList');
+    if (!state.loads.length) { el.innerHTML = '<div class="empty">No loads yet — click + to add your fridge, freezer, well pump, lights…</div>'; return; }
+    el.innerHTML = state.loads.map((l) => {
+      const q = Math.max(1, parseInt(l.qty) || 1);
+      const daily = Calc.loadDaily(l) / 1000;
+      const how = l.mode === 'kwh' ? `${num(l.kwhPerDay, 2)} kWh/day measured` : `${num(l.watts)}W × ${num(l.hours, 2)} hrs/day`;
+      const season = l.season === 'winter' ? ' · winter only' : l.season === 'summer' ? ' · summer only' : '';
+      return `<div class="card t-load" data-id="${l.id}" data-kind="load">
+        <div class="ctype">${TYPE_ICON.load} Load${l.voltage === '240' ? ' · 240V' : ''}</div>
+        <div class="cname">${q > 1 ? q + ' × ' : ''}${esc(l.name || 'Unnamed load')}</div>
+        <div class="cline">${how}${season}</div>
+        <div class="cline">≈ <b>${num(daily, 2)} kWh</b> per day${l.motor ? ' · motor' : ''}</div></div>`;
+    }).join('');
+  }
+
+  function supplySummary(s) {
+    const q = Math.max(1, parseInt(s.qty) || 1);
+    if (s.type === 'generator') return [`${num(s.runW)}W running · ${num(s.surgeW)}W surge · ${esc(s.voltage || '120')}V`,
+      `${num(s.tankGal, 1)} gal tank ≈ ${num(s.hoursPerTank, 1)} hrs${parseFloat(s.spareGal) ? ` · +${num(s.spareGal, 1)} gal spare` : ''}`];
+    if (s.type === 'battery') return [`${q > 1 ? q + ' × ' : ''}${num(s.wh)} Wh · ${num(s.contW)}W output`,
+      `AC charge ${num(s.acChargeW)}W${s.pvMaxW ? ` · solar up to ${num(s.pvMaxW)}W` : ''}`];
+    if (s.type === 'inverter') return [`${num(s.contW)}W · ${num(s.bankWh)} Wh bank`, s.pvMaxW ? `Solar up to ${num(s.pvMaxW)}W, ${num(s.pvMaxV)}V max` : ''];
+    if (s.type === 'module') {
+      const dev = state.supplies.find((x) => x.id === s.attachTo);
+      return [`${num(s.qty || 1)} × ${num(s.watts)}W = ${num((parseFloat(s.qty) || 1) * (parseFloat(s.watts) || 0))}W`,
+        dev ? `Plugged into ${esc(dev.name || TYPE_LABEL[dev.type])}` : '<span style="color:var(--warn)">Not plugged into anything yet</span>'];
+    }
+    return [];
+  }
+  function renderSupplies() {
+    const el = $('#bbp-supplyList');
+    if (!state.supplies.length) { el.innerHTML = '<div class="empty">No power supplies yet — click + to add a generator, battery or solar.</div>'; return; }
+    const order = { generator: 0, battery: 1, inverter: 2, module: 3 };
+    el.innerHTML = [...state.supplies].sort((a, b) => order[a.type] - order[b.type]).map((s) => {
+      const [l1, l2] = supplySummary(s);
+      const mm = [s.make, s.model].filter(Boolean).join(' ');
+      return `<div class="card t-${s.type}" data-id="${s.id}" data-kind="supply">
+        <div class="ctype">${TYPE_ICON[s.type]} ${TYPE_LABEL[s.type]}</div>
+        <div class="cname">${esc(s.name || mm || TYPE_LABEL[s.type])}</div>
+        ${mm && s.name ? `<div class="cline">${esc(mm)}</div>` : ''}
+        <div class="cline">${l1}</div>${l2 ? `<div class="cline">${l2}</div>` : ''}</div>`;
+    }).join('');
+  }
+
+  function renderRuntime() {
+    const ready = state.loads.length && state.supplies.length;
+    const res = ready ? Calc.computeAll(state) : null;
+    const allWarnings = new Set();
+    [['winter', '#bbp-boxWinter'], ['summer', '#bbp-boxSummer']].forEach(([season, sel]) => {
+      const box = $(sel);
+      const sun = res ? res[season].sun : Calc.sunForDay(parseFloat(state.settings.lat) || 37.5, state.settings.tilt === '' ? Math.abs(parseFloat(state.settings.lat) || 37.5) : parseFloat(state.settings.tilt), season === 'winter');
+      const dl = sun.daylight, h = Math.floor(dl), m = Math.round((dl - h) * 60);
+      box.querySelector('.sunline').textContent = `${state.settings.city ? state.settings.city + ' · ' : ''}${h}h ${m}m daylight · ≈${sun.sunHours.toFixed(1)} full-sun hours${sun.overridden ? ' (your number)' : ''}`;
+      const body = box.querySelector('.rb-body');
+      if (!ready) { body.innerHTML = '<div class="rb-empty">Add at least one load and one power supply to see your runtime.</div>'; return; }
+      const locs = res[season].locs.filter((r) => !r.empty || res[season].locs.length === 1);
+      const bigCls = (d) => d === Infinity ? 'big unlimited' : d < 1 / 24 ? 'big zero' : 'big';
+      const statsHtml = (r) => `<div class="stats"><span>Daily use <b>${(r.E / 1000).toFixed(2)} kWh</b></span>
+        ${r.solarWh ? `<span>Solar <b>${(r.solarWh / 1000).toFixed(2)} kWh</b></span>` : ''}
+        ${r.storeWh ? `<span>Battery <b>${(r.storeWh / 1000).toFixed(2)} kWh</b> usable</span>` : ''}</div>`;
+      if (locs.length === 1) {
+        const r = locs[0];
+        body.innerHTML = `<div class="${bigCls(r.days)}">${Calc.fmtDays(r.days)}</div>${statsHtml(r)}
+          <ul class="notes">${r.notes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`;
+      } else {
+        body.innerHTML = locs.map((r) => `<div class="loc-row"><div><div class="loc-name">${esc(r.loc)}</div>${statsHtml(r)}</div>
+          <div class="${bigCls(r.days)}">${Calc.fmtDays(r.days)}</div></div>
+          <ul class="notes">${r.notes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('');
+      }
+      locs.forEach((r) => r.warnings.forEach((w) => allWarnings.add(w)));
+    });
+    const wEl = $('#bbp-warnings');
+    if (allWarnings.size) { wEl.hidden = false; wEl.innerHTML = `<h3>⚠ Things to check</h3><ul>${[...allWarnings].map((w) => `<li>${esc(w)}</li>`).join('')}</ul>`; }
+    else wEl.hidden = true;
+  }
+
+  const WEATHER = { cloudy: 1, storm: 0.5 };
+  function renderCard() {
+    const st = state.settings;
+    const weather = st.cardWeather || 'winter';
+    const gh = st.genHours === undefined || st.genHours === '' ? 4 : st.genHours;
+    $('#bbp-bcWeather').value = weather;
+    if (document.activeElement !== $('#bbp-bcGenHours')) $('#bbp-bcGenHours').value = gh;
+    const body = $('#bbp-bcBody');
+    if (!state.loads.length) { body.innerHTML = '<p class="bc-note">Add a load to see your Backup Card.</p>'; return; }
+    const season = weather === 'summer' ? 'summer' : 'winter';
+    const sunHours = WEATHER[weather] ?? Calc.solarForSeason(st, season === 'winter').sunHours;
+    const c = Calc.backupCard(state, { season, sunHours, genHours: gh });
+    if (c.empty) { body.innerHTML = '<p class="bc-note">Your loads use no power yet — add watts and hours.</p>'; return; }
+    const fmt = (x) => Math.round(x).toLocaleString();
+    const stat = (l, v) => `<div class="bc-stat"><span>${esc(l)}</span><b>${esc(v)}</b></div>`;
+    let h = `<div class="bc-head">Your loads</div><div class="bc-stats">${stat('Steady pour (average draw)', fmt(c.avg) + ' W')}${stat('Whole day of use', fmt(c.daily) + ' Wh')}${stat('Everything on at once', fmt(c.peak) + ' W')}${stat('Big gulp (worst start-up)', fmt(c.gulp) + ' W')}</div>`;
+    c.sections.forEach((sec) => { h += `<div class="bc-head">${esc(sec.title)}</div><div class="bc-stats">${sec.stats.map(([l, v]) => stat(l, v)).join('')}</div>${sec.note ? `<p class="bc-note">${esc(sec.note)}</p>` : ''}`; });
+    if (!st.city && !parseFloat(st.lat) && state.supplies.some((x) => x.type === 'module')) h += '<p class="bc-note">Solar isn\'t counted until you set the nearest city on your solar panels.</p>';
+    h += c.warns.map((w) => `<div class="bc-warn">${w}</div>`).join('') + c.oks.map((o) => `<div class="bc-ok">${esc(o)}</div>`).join('');
+    body.innerHTML = h;
+  }
+  $('#bbp-bcWeather').onchange = (e) => { state.settings.cardWeather = e.target.value; changed(); };
+  $('#bbp-bcGenHours').oninput = (e) => { state.settings.genHours = e.target.value; changed(); };
+
+  // ---------- Modal ----------
+  function openModal(title, bodyHtml, footHtml) {
+    $('#bbp-modalTitle').textContent = title; $('#bbp-modalBody').innerHTML = bodyHtml; $('#bbp-modalFoot').innerHTML = footHtml || '';
+    $('#bbp-modal').hidden = false;
+  }
+  function closeModal() { $('#bbp-modal').hidden = true; }
+  $('#bbp-modalClose').onclick = closeModal;
+  $('#bbp-modal').addEventListener('mousedown', (e) => { if (e.target.id === 'bbp-modal') closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+
+  function fieldHtml(f, o) {
+    if (f.section) return `<div class="section-label">${esc(f.section)}</div>`;
+    if (f.show && !f.show(o)) return '';
+    const v = o[f.k] ?? '';
+    const cls = 'field' + (f.full ? ' full' : '');
+    const help = f.help ? `<div class="help">${esc(f.help)}</div>` : '';
+    const unit = f.unit ? ` <span style="color:var(--muted);font-weight:400">(${f.unit})</span>` : '';
+    switch (f.type) {
+      case 'text': return `<div class="${cls}"><label>${f.label}</label><input data-k="${f.k}" type="text" value="${esc(v)}" placeholder="${esc(f.ph || '')}">${help}</div>`;
+      case 'num': return `<div class="${cls}"><label>${f.label}${unit}</label><input data-k="${f.k}" type="number" step="any" min="0" value="${esc(v)}" placeholder="${esc(f.ph || '')}">${help}</div>`;
+      case 'select': return `<div class="${cls}"><label>${f.label}</label><select data-k="${f.k}">${f.options.map(([val, lab]) => `<option value="${val}"${String(v || f.options[0][0]) === val ? ' selected' : ''}>${esc(lab)}</option>`).join('')}</select>${help}</div>`;
+      case 'check': return `<div class="${cls}"><label><input data-k="${f.k}" type="checkbox"${v ? ' checked' : ''}>${f.label}</label>${help}</div>`;
+      case 'city': {
+        const cur = state.settings.city || '';
+        const known = cityLookup(cur);
+        return `<div class="${cls}"><label>${f.label} <span class="req">— needed for runtime</span></label>
+          <input data-city list="bbp-cityList" value="${esc(cur)}" placeholder="Start typing, e.g. Richmond, VA">
+          <datalist id="bbp-cityList">${CITIES.map((c) => `<option value="${esc(c[0] + ', ' + c[1])}">`).join('')}</datalist>
+          <div class="callout" style="margin-top:6px">📍 <b>The nearest city is needed for runtime calculations.</b> It tells the planner how many hours of sun your panels get on the shortest and longest days. It's shared by all your panels.${cur && !known ? '<br><span style="color:var(--warn)">That city isn\'t in the built-in list — pick a nearby one, or set your latitude in Settings.</span>' : ''}</div></div>`;
+      }
+      case 'mode': return `<div class="${cls}"><label>${f.label}</label><div class="seg" data-seg="mode">
+          <button type="button" data-v="watts" class="${o.mode !== 'kwh' ? 'on' : ''}">Watts × hours</button>
+          <button type="button" data-v="kwh" class="${o.mode === 'kwh' ? 'on' : ''}">I measured kWh/day</button></div></div>`;
+      case 'gear': {
+        const list = GEAR[f.kind];
+        const sel = o.gearIdx ?? '';
+        const tip = list[sel] ? list[sel][2] + (f.kind === 'generator' ? GEN_HINT : '') : '';
+        return `<div class="${cls}"><label>Start from a common type (optional)</label><select data-gear="${f.kind}"><option value="">— My own (enter numbers below) —</option>${list.map((g, i) => `<option value="${i}"${String(sel) === String(i) ? ' selected' : ''}>${esc(g[0])}</option>`).join('')}</select>${tip ? `<div class="callout preset-tip">${esc(tip)}</div>` : '<div class="help">Fills in typical numbers. Swap in the ones from your own label or manual.</div>'}</div>`;
+      }
+      case 'preset': {
+        const groups = [...new Set(PRESETS.map((p) => p[0]))];
+        return `<div class="${cls}"><label>${f.label}</label><select data-preset><option value="">— Pick a common item, or choose "Something else" —</option>${groups.map((g) => `<optgroup label="${esc(g)}">${PRESETS.map((p, i) => p[0] === g ? `<option value="${i}"${String(o.presetIdx) === String(i) ? ' selected' : ''}>${esc(p[1])}  (~${p[2]}W, ${p[3]} hrs/day)</option>` : '').join('')}</optgroup>`).join('')}<optgroup label="Other"><option value="custom"${o.presetIdx === 'custom' ? ' selected' : ''}>Something else (enter your own)</option></optgroup></select>${tipFor(o.name) ? `<div class="callout preset-tip">💡 ${esc(tipFor(o.name))}</div>` : ''}<div class="help">Fills in typical numbers you can change. A plug-in watt meter (about $20–30) tells you the truth: enter its average watts and set hours to 24.</div></div>`;
+      }
+      case 'attach': {
+        const devs = state.supplies.filter((s) => s.type === 'battery' || s.type === 'inverter');
+        if (!devs.length) return `<div class="${cls}"><label>${f.label}</label><div class="callout">Panels need somewhere to send power. Add a <b>battery</b> or <b>off-grid inverter</b> first, then come back and connect these panels to it. (You can still save them now.)</div></div>`;
+        return `<div class="${cls}"><label>${f.label}</label><select data-k="attachTo"><option value="">— Choose a battery or inverter —</option>${devs.map((d) => `<option value="${d.id}"${v === d.id ? ' selected' : ''}>${esc(d.name || [d.make, d.model].join(' ') || TYPE_LABEL[d.type])} </option>`).join('')}</select></div>`;
+      }
+    }
+    return '';
+  }
+
+  function cityLookup(text) {
+    const t = String(text || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!t) return null;
+    return CITIES.find((c) => (c[0] + ', ' + c[1]).toLowerCase() === t) ||
+      CITIES.find((c) => c[0].toLowerCase() === t.split(',')[0].trim()) || null;
+  }
+  function setCity(text) {
+    const c = cityLookup(text);
+    state.settings.city = c ? c[0] + ', ' + c[1] : text;
+    if (c) state.settings.lat = c[2];
+  }
+
+  function readForm(o) {
+    $('#bbp-modalBody').querySelectorAll('[data-k]').forEach((el) => {
+      const k = el.dataset.k;
+      o[k] = el.type === 'checkbox' ? el.checked : el.value.trim();
+    });
+    return o;
+  }
+
+  function editItem(kind, item, isNew) {
+    const def = DEFS[kind];
+    const draft = Object.assign({}, item);
+    const draw = () => {
+      $('#bbp-modalBody').innerHTML = `<div class="grid">${def.map((f) => fieldHtml(f, draft)).join('')}</div>`;
+      const seg = $('#bbp-modalBody').querySelector('[data-seg]');
+      if (seg) seg.querySelectorAll('button').forEach((b) => b.onclick = () => { readForm(draft); draft.mode = b.dataset.v; draw(); });
+      const gear = $('#bbp-modalBody').querySelector('[data-gear]');
+      if (gear) gear.onchange = () => {
+        readForm(draft);
+        draft.gearIdx = gear.value;
+        const g = GEAR[gear.dataset.gear][gear.value];
+        if (g) { Object.assign(draft, g[1]); if (!draft.name) draft.name = g[0]; }
+        draw();
+      };
+      const pre = $('#bbp-modalBody').querySelector('[data-preset]');
+      if (pre) pre.onchange = () => {
+        readForm(draft);
+        draft.presetIdx = pre.value;
+        const p = PRESETS[pre.value];
+        if (p) Object.assign(draft, { name: p[1], watts: p[2], hours: p[3], motor: p[4], voltage: p[5], season: p[6] || 'both', mode: 'watts' });
+        draw();
+      };
+    };
+    const title = (isNew ? 'Add ' : 'Edit ') + TYPE_LABEL[kind].toLowerCase();
+    openModal(title, '', `${isNew ? '' : '<button class="btn danger" id="bbp-mDelete">Delete</button>'}<span class="spacer"></span>
+      <button class="btn" id="bbp-mCancel">Cancel</button><button class="btn primary" id="bbp-mSave">${isNew ? 'Add' : 'Save'}</button>`);
+    draw();
+    $('#bbp-mCancel').onclick = closeModal;
+    $('#bbp-mSave').onclick = () => {
+      readForm(draft);
+      if (kind === 'module') {
+        const cityEl = $('#bbp-modalBody').querySelector('[data-city]');
+        const typed = cityEl ? cityEl.value.trim() : '';
+        if (!typed) { cityEl.style.borderColor = 'var(--bad)'; cityEl.focus(); cityEl.placeholder = 'Please choose the nearest city'; return; }
+        setCity(typed);
+      }
+      const list = kind === 'load' ? state.loads : state.supplies;
+      const i = list.findIndex((x) => x.id === draft.id);
+      if (i >= 0) list[i] = draft; else list.push(draft);
+      closeModal(); changed();
+    };
+    const del = $('#bbp-mDelete');
+    if (del) del.onclick = () => {
+      if (!confirmInline(del)) return;
+      if (kind === 'load') state.loads = state.loads.filter((x) => x.id !== draft.id);
+      else {
+        state.supplies = state.supplies.filter((x) => x.id !== draft.id);
+        state.supplies.forEach((m) => { if (m.attachTo === draft.id) m.attachTo = ''; });
+      }
+      closeModal(); changed();
+    };
+  }
+  // two-click delete (no blocking browser dialogs)
+  function confirmInline(btn) {
+    if (btn.dataset.armed) return true;
+    btn.dataset.armed = '1'; btn.textContent = 'Click again to delete';
+    setTimeout(() => { if (btn.isConnected) { delete btn.dataset.armed; btn.textContent = 'Delete'; } }, 3000);
+    return false;
+  }
+
+  function addSupply() {
+    openModal('Add a power supply', `<div class="choices">
+      <button class="choice" data-c="generator"><span class="ci">⛽</span><b>Generator</b><small>Gas, propane or diesel</small></button>
+      <button class="choice" data-c="battery"><span class="ci">🔋</span><b>Battery</b><small>Power station like Pecron, Bluetti, EcoFlow</small></button>
+      <button class="choice" data-c="solar"><span class="ci">☀️</span><b>Solar</b><small>Panels or an off-grid inverter</small></button></div>`);
+    $('#bbp-modalBody').querySelectorAll('.choice').forEach((b) => b.onclick = () => {
+      const c = b.dataset.c;
+      if (c === 'solar') return chooseSolar();
+      editItem(c, defaults(c), true);
+    });
+  }
+  function chooseSolar() {
+    openModal('Add solar', `<div class="choices">
+      <button class="choice" data-c="module"><span class="ci">▦</span><b>Solar modules</b><small>The panels themselves</small></button>
+      <button class="choice" data-c="inverter"><span class="ci">🔌</span><b>Off-grid inverter</b><small>All-in-one unit with its own battery bank (Growatt, EG4, Victron…)</small></button></div>
+      <p class="hint" style="margin-top:14px">Tip: a power station with a solar port counts as a <b>battery</b>. Add it there, then add panels here and plug them into it.</p>`,
+      '<button class="btn" id="bbp-mBack">← Back</button>');
+    $('#bbp-mBack').onclick = addSupply;
+    $('#bbp-modalBody').querySelectorAll('.choice').forEach((b) => b.onclick = () => editItem(b.dataset.c, defaults(b.dataset.c), true));
+  }
+  function defaults(kind) {
+    const base = { id: uid(), type: kind };
+    if (kind === 'load') Object.assign(base, { mode: 'watts', qty: 1, season: 'both', voltage: '120' });
+    if (kind === 'battery') Object.assign(base, { qty: 1, chem: 'lifepo4', voltage: '120', mppt: 1 });
+    if (kind === 'inverter') Object.assign(base, { chem: 'lifepo4', voltage: '120/240', mppt: 1 });
+    if (kind === 'generator') Object.assign(base, { fuel: 'gas', voltage: '120' });
+    if (kind === 'module') {
+      Object.assign(base, { qty: 1, series: 1 });
+      const devs = state.supplies.filter((s) => s.type === 'battery' || s.type === 'inverter');
+      if (devs.length === 1) base.attachTo = devs[0].id;
+    }
+    return base;
+  }
+
+  function openSettings() {
+    const s = state.settings;
+    openModal('Settings', `<div class="grid">
+      <div class="field full"><label>Nearest city <span class="req">— needed for runtime</span></label><input id="bbp-sCity" list="bbp-cityList2" value="${esc(s.city)}" placeholder="Start typing, e.g. Richmond, VA"><datalist id="bbp-cityList2">${CITIES.map((c) => `<option value="${esc(c[0] + ', ' + c[1])}">`).join('')}</datalist><div class="help">Sets how many hours of sun your solar panels get. Fills in latitude for you.</div></div>
+      <div class="field"><label>Latitude (advanced)</label><input id="bbp-sLat" type="number" step="0.1" value="${esc(s.lat)}" placeholder="Set by city"><div class="help">Only change this if your city isn't in the list.</div></div>
+      <div class="field"><label>Panel tilt (degrees)</label><input id="bbp-sTilt" type="number" step="1" min="0" max="90" value="${esc(s.tilt)}" placeholder="Same as latitude"><div class="help">0 = lying flat. Leave blank for a typical fixed, south-facing mount.</div></div>
+      <div class="section-label">Use my own sun-hour numbers (optional)</div>
+      <div class="field"><label>Winter full-sun hours</label><input id="bbp-sWin" type="number" step="0.1" min="0" value="${esc(s.sunWinterOverride)}" placeholder="Auto"></div>
+      <div class="field"><label>Summer full-sun hours</label><input id="bbp-sSum" type="number" step="0.1" min="0" value="${esc(s.sunSummerOverride)}" placeholder="Auto"></div>
+      <div class="field full"><div class="help">Leave these blank to use the built-in estimate. They estimate an average day — a run of cloudy days makes much less.</div></div>
+    </div>`, '<span class="spacer"></span><button class="btn" id="bbp-mCancel">Cancel</button><button class="btn primary" id="bbp-mSave">Save</button>');
+    $('#bbp-mCancel').onclick = closeModal;
+    $('#bbp-mSave').onclick = () => {
+      const typed = $('#bbp-sCity').value.trim();
+      const oldLat = String(s.lat ?? ''), newLat = $('#bbp-sLat').value;
+      if (typed !== (s.city || '')) setCity(typed);
+      if (newLat && newLat !== oldLat) s.lat = newLat;
+      s.tilt = $('#bbp-sTilt').value; s.sunWinterOverride = $('#bbp-sWin').value; s.sunSummerOverride = $('#bbp-sSum').value;
+      closeModal(); changed();
+    };
+  }
+
+  function openHelp() {
+    const K = Calc.K;
+    openModal('How it works', `<div class="help-text">
+      <h4>The two boxes</h4><p>They show how long your setup keeps your loads running starting from full batteries and full fuel — on the <b>shortest</b> day of the year (least sun) and the <b>longest</b> (most sun). Real life lands somewhere between, and a stretch of cloudy days can be worse than the winter box.</p>
+      <h4>The order power gets used</h4><ol><li>Solar runs things during the day and charges the batteries.</li><li>Batteries cover the rest until they're empty.</li><li>Then the generator runs a few hours a day to refill the batteries, until the fuel is gone.</li></ol>
+      <p>With no battery, the generator has to run the whole time anything is on, which burns fuel much faster.</p>
+      <h4>One circuit</h4><p>All loads and power supplies are treated as connected together, so any battery or generator can power any load.</p>
+      <h4>Built-in assumptions</h4><ul>
+        <li>Batteries: LiFePO4 counts ${K.usable.lifepo4 * 100}% of its size, lead-acid ${K.usable.leadacid * 100}%, and turning battery power into outlet power loses about ${Math.round((1 - K.inverterEff) * 100)}%.</li>
+        <li>Solar panels make about ${K.solarDerate * 100}% of their label watts in real use (heat, dirt, wiring).</li>
+        <li>Generators aren't planned past ${K.genMaxLoad * 100}% of running watts, and fuel use follows the "hours per tank" you enter.</li>
+        <li>Motors need about ${K.motorSurge}× their running watts for a second to start.</li>
+        <li>Sun hours are estimated from your latitude for an average-weather day.</li></ul>
+      <h4>Your data</h4><p><b>Nothing you enter is stored anywhere.</b> It isn't saved on this device, sent to The Blackout Brief, or sent anywhere else. It only lives on this page while it's open, and it's gone when you refresh or leave.</p>
+    </div>`, '<button class="btn primary" id="bbp-mOk">Got it</button>');
+    $('#bbp-mOk').onclick = closeModal;
+  }
+
+  // ---------- Wire up ----------
+  $('#bbp-addLoad').onclick = () => editItem('load', defaults('load'), true);
+  $('#bbp-addSupply').onclick = addSupply;
+  $('#bbp-settingsBtn').onclick = openSettings;
+  $('#bbp-helpBtn').onclick = openHelp;
+  $('#bbp-loadList').onclick = (e) => { const c = e.target.closest('.card'); if (c) editItem('load', state.loads.find((x) => x.id === c.dataset.id), false); };
+  $('#bbp-supplyList').onclick = (e) => { const c = e.target.closest('.card'); if (!c) return; const s = state.supplies.find((x) => x.id === c.dataset.id); editItem(s.type, s, false); };
+  $('#bbp-loadExample').onclick = () => { merge(JSON.parse(JSON.stringify(EXAMPLE))); changed(); };
+  $('#bbp-startBlank').onclick = () => { merge({ settings: { city: state.settings.city, lat: state.settings.lat }, loads: [], supplies: [] }); changed(); };
+
+  load().then(render);
+})();
+
+})();
+</script>
+</body>
+</html>
