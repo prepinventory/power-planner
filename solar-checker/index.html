@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar Panel Compatibility Checker | The Blackout Brief</title>
+<meta name="description" content="Free checker from The Blackout Brief: will your solar panels work safely with your battery or power station? Checks cold-weather voltage, amps, watts and daily refill. Nothing you enter is stored.">
+<meta property="og:title" content="Solar Panel Compatibility Checker | The Blackout Brief">
+<meta property="og:description" content="Will your panels fry your power station? Check volts, amps and watts before you plug in. Free, private, no sign-up.">
+<meta name="theme-color" content="#14160F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='20' fill='%2314160F'/%3E%3Cpath d='M14 60 L60 20 L106 60' fill='none' stroke='%23E8E4D8' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M28 52 V102 H92 V52' fill='none' stroke='%23E8E4D8' stroke-width='10' stroke-linejoin='round'/%3E%3Crect x='46' y='62' width='28' height='28' rx='2' fill='%23E8A33D'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#14160F}
+.sc{--bg:#14160F;--panel:#1F2318;--card:#272C1F;--line:#3A4030;--text:#E8E4D8;--muted:#9E9C92;--accent:#E8A33D;--accent2:#F2BE6A;--cold:#7FB8E0;--good:#7CC48A;--warn:#E8A33D;--bad:#E06A5A;--radius:6px;
+  --display:"Oswald","Bahnschrift SemiCondensed","Bahnschrift","Arial Narrow",sans-serif;
+  background:var(--bg);color:var(--text);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;min-height:100vh}
+.sc *{box-sizing:border-box}
+.sc h1,.sc h2,.sc h3{margin:0;font-weight:650}
+.sc p{margin:0}
+.sc .topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:18px;padding:26px 24px 12px;background:#0F110B;border-bottom:2px solid var(--accent)}
+.sc .logo{display:flex;align-items:center;gap:12px;flex:none}
+.sc .wordmark{display:flex;flex-direction:column;font-family:var(--display);font-weight:700;font-size:21px;line-height:1;text-transform:uppercase}
+.sc .wordmark .brief{color:var(--accent);letter-spacing:4px}
+.sc .divider{width:1px;height:44px;background:var(--line)}
+.sc .titles h1{font-size:22px;font-family:var(--display);text-transform:uppercase;letter-spacing:.5px}
+.sc .sub{margin-top:2px;color:var(--muted)}
+.sc a.back{color:var(--muted);text-decoration:none;font-size:13px;position:absolute;top:6px;left:24px}
+.sc a.back:hover{color:var(--accent)}
+.sc main{max-width:1240px;margin:0 auto;padding:22px 24px 40px}
+.sc .intro{color:var(--muted);margin-bottom:6px}
+.sc .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.sc .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-top:18px}
+.sc .grid3 .panel{margin-top:0}
+.sc .panel h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.5px;font-size:19px}
+.sc .hint{margin:2px 0 10px;color:var(--muted);font-size:13.5px}
+.sc .field{margin-top:10px}
+.sc .field label{display:block;font-size:13.5px;font-weight:600}
+.sc .field .help{font-size:12px;color:var(--muted);margin-top:3px}
+.sc .field input,.sc .field select{width:100%;padding:8px 10px;margin-top:4px;background:#171A11;color:var(--text);border:1px solid var(--line);border-radius:6px;font:inherit}
+.sc .field input:focus,.sc .field select:focus{outline:none;border-color:var(--accent)}
+.sc .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sc .check{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:13.5px}
+.sc .check input{margin-top:3px}
+.sc .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.sc .btn{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 14px;color:var(--text);font:inherit;cursor:pointer}
+.sc .btn:hover{border-color:var(--accent)}
+.sc .verdict{margin-top:18px;border-radius:var(--radius);padding:18px 20px;border:1px solid var(--line);border-left:6px solid var(--good);background:var(--panel)}
+.sc .verdict.bad{border-left-color:var(--bad)}
+.sc .verdict.warn{border-left-color:var(--warn)}
+.sc .verdict h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.5px;font-size:22px}
+.sc .verdict.good h2{color:var(--good)} .sc .verdict.bad h2{color:var(--bad)} .sc .verdict.warn h2{color:var(--warn)}
+.sc .verdict p{margin-top:6px}
+.sc .checks{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.sc .chk{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;border-top:4px solid var(--good)}
+.sc .chk.bad{border-top-color:var(--bad)} .sc .chk.warn{border-top-color:var(--warn)} .sc .chk.info{border-top-color:var(--cold)}
+.sc .chk .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.sc .chk .big{font-size:30px;font-weight:750;line-height:1.15;margin-top:4px}
+.sc .chk.bad .big{color:var(--bad)} .sc .chk.warn .big{color:var(--warn)} .sc .chk.good .big{color:var(--good)} .sc .chk.info .big{color:var(--cold)}
+.sc .chk .what{font-size:13px;color:var(--muted);margin-top:4px}
+.sc table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+.sc th,.sc td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.sc th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.4px}
+.sc tr.best td{background:#2B2614}
+.sc .pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:20px;border:1px solid var(--line)}
+.sc .pill.good{color:var(--good);border-color:#3f6a47} .sc .pill.bad{color:var(--bad);border-color:#7a3a32} .sc .pill.warn{color:var(--warn);border-color:#6a5222}
+.sc .notes{margin:8px 0 0;padding-left:18px;font-size:14px}
+.sc .notes li{margin:4px 0}
+.sc .safety{background:#2B2614;border:1px solid #5C4A1C}
+.sc .safety h2{color:var(--warn)}
+.sc .foot{margin-top:22px;color:var(--muted);font-size:12.5px}
+.sc .tablewrap{overflow-x:auto}.sc .tablewrap table{min-width:680px}
+@media (max-width:900px){.sc .grid3{grid-template-columns:1fr}.sc .checks{grid-template-columns:1fr 1fr}}
+@media (max-width:700px){.sc .titles h1{font-size:18px}.sc a.back{left:14px}.sc .topbar{padding:26px 14px 12px}.sc main{padding:16px 14px 32px}.sc .divider,.sc .logo .wordmark{display:none}.sc .checks{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sc">
+<header class="topbar">
+  <div class="logo" aria-label="The Blackout Brief">
+    <svg width="54" height="54" viewBox="0 0 120 120" aria-hidden="true"><path d="M14 60 L60 20 L106 60" fill="none" stroke="#E8E4D8" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 52 V102 H92 V52" fill="none" stroke="#E8E4D8" stroke-width="9" stroke-linejoin="round"/><rect x="46" y="62" width="28" height="28" rx="2" fill="#E8A33D"/></svg>
+    <div class="wordmark"><span>The Blackout</span><span class="brief">Brief</span></div>
+  </div>
+  <div class="divider"></div>
+  <a class="back" href="https://blackout-brief-c7dc37.beehiiv.com/" target="_top">← The Blackout Brief</a>
+  <div class="titles">
+    <h1>Solar Panel Compatibility Checker</h1>
+    <p class="sub">Will your panels work safely with your battery or power station?</p>
+  </div>
+</header>
+
+<main>
+  <p class="intro">Copy a few numbers off the sticker on the back of your panel and the solar input spec in your power station's manual. The checker tests every way you could wire them and shows which ones are safe. An example setup is loaded; change any number to match your gear.</p>
+
+  <div class="grid3">
+    <section class="panel">
+      <h2>1. Your panel</h2>
+      <p class="hint">From the label on the back of one panel.</p>
+      <div class="field"><label for="pW">Rated watts (Pmax)</label><input id="pW" type="number" min="1" step="1"></div>
+      <div class="row2">
+        <div class="field"><label for="pVoc">Voc (volts)</label><input id="pVoc" type="number" min="1" step="0.1"><div class="help">Open-circuit voltage</div></div>
+        <div class="field"><label for="pIsc">Isc (amps)</label><input id="pIsc" type="number" min="0.1" step="0.01"><div class="help">Short-circuit current</div></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="pVmp">Vmp (volts)</label><input id="pVmp" type="number" min="1" step="0.1"><div class="help">Max-power voltage</div></div>
+        <div class="field"><label for="pCoef">Voc temp. coefficient</label><input id="pCoef" type="number" step="0.01"><div class="help">%/°C, from the spec sheet. Use −0.30 if you can't find it.</div></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="pFuse">Max series fuse (A)</label><input id="pFuse" type="number" min="0" step="1"><div class="help">Leave 0 if unknown</div></div>
+        <div class="field"><label for="pN">How many panels?</label><input id="pN" type="number" min="1" max="12" step="1"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>2. Your battery's solar input</h2>
+      <p class="hint">From the manual or the label near the solar port.</p>
+      <div class="row2">
+        <div class="field"><label for="sVmin">Lowest volts</label><input id="sVmin" type="number" min="0" step="1"></div>
+        <div class="field"><label for="sVmax">Highest volts</label><input id="sVmax" type="number" min="1" step="1"><div class="help">The limit you must never go over</div></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="sAmax">Max amps</label><input id="sAmax" type="number" min="0.1" step="0.1"></div>
+        <div class="field"><label for="sWmax">Max watts</label><input id="sWmax" type="number" min="1" step="1"></div>
+      </div>
+      <div class="field"><label for="sWh">Battery size (Wh)</label><input id="sWh" type="number" min="1" step="1"></div>
+      <label class="check"><input id="sAmpsOk" type="checkbox"> <span>My manual says it's OK to connect panels that can push more amps than the input max (the station limits the current itself).</span></label>
+    </section>
+
+    <section class="panel">
+      <h2>3. Your weather</h2>
+      <p class="hint">Cold raises panel voltage, so the coldest morning matters most.</p>
+      <div class="row2">
+        <div class="field"><label for="wCold">Coldest morning (°F)</label><input id="wCold" type="number" step="1"><div class="help">The coldest it ever gets where the panels sit</div></div>
+        <div class="field"><label for="wHot">Hottest afternoon (°F)</label><input id="wHot" type="number" step="1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="wSunW">Winter sun hours</label><input id="wSunW" type="number" min="0" step="0.1"></div>
+        <div class="field"><label for="wSunS">Summer sun hours</label><input id="wSunS" type="number" min="0" step="0.1"></div>
+      </div>
+      <p class="hint" style="margin-top:8px">"Sun hours" means hours of full-strength sun, not daylight. Look yours up with NREL's <a href="https://pvwatts.nrel.gov/" target="_blank" rel="noopener" style="color:var(--accent2)">PVWatts calculator</a>.</p>
+      <div class="btnrow">
+        <button class="btn" id="btnExample" type="button">Load the example</button>
+        <button class="btn" id="btnBlank" type="button">Start blank</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="verdict" class="verdict"></div>
+
+  <section class="panel">
+    <h2>Every way to wire your panels</h2>
+    <p class="hint"><b>Series</b> (plus to minus, in a chain) adds volts. <b>Parallel</b> (pluses together, minuses together) adds amps. The highlighted row is the safe setup that harvests the most power.</p>
+    <div class="tablewrap"><table id="table"></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>What this means for you</h2>
+    <ul class="notes" id="notes"></ul>
+  </section>
+
+  <section class="panel safety">
+    <h2>Before you plug in</h2>
+    <ul class="notes">
+      <li><b>Cover the panels first.</b> A panel has no off switch; any light makes it live. Cover them with a blanket or tarp, or lay them face-down, before you connect or disconnect anything. DC sparks don't snuff themselves out the way wall power does.</li>
+      <li><b>Measure before you connect.</b> Uncover the panels and check voltage and polarity (plus on plus) at the plug end with a multimeter. With nothing plugged in, no current flows. Then cover, plug in, and uncover.</li>
+      <li><b>Match your connectors.</b> MC4 plugs from different brands can fit loosely, heat up and melt. The electrical code requires connectors that plug together to be the same brand and type, unless both makers list them as compatible.</li>
+      <li><b>Parallel takes a Y-branch splitter.</b> Three or more panels in parallel usually need an in-line fuse on each panel.</li>
+      <li><b>Tie the panels down</b> and keep the connectors off wet ground.</li>
+    </ul>
+  </section>
+
+  <p class="foot">🔒 Nothing you enter is saved or sent anywhere. Refresh the page to start over. Results are estimates based on the numbers you enter; always follow your panel and power station manuals. From The Blackout Brief.</p>
+</main>
+</div>
+
+<script>
+(function(){
+  var EXAMPLE={pW:320,pVoc:45.3,pIsc:9.26,pVmp:36.8,pCoef:-0.31,pFuse:15,pN:4,sVmin:11,sVmax:60,sAmax:20,sWmax:600,sWh:1024,sAmpsOk:false,wCold:10,wHot:95,wSunW:3,wSunS:5.5};
+  var ids=Object.keys(EXAMPLE);
+  function $(id){return document.getElementById(id)}
+  function fill(o){ids.forEach(function(k){var el=$(k); if(el.type==="checkbox") el.checked=!!o[k]; else el.value=(o[k]===""?"":o[k]);}); run();}
+  function num(id){var v=parseFloat($(id).value); return isFinite(v)?v:NaN}
+  function fmt(n,d){if(!isFinite(n))return "–"; return n.toLocaleString(undefined,{maximumFractionDigits:d===undefined?0:d,minimumFractionDigits:0})}
+  function fToC(f){return (f-32)*5/9}
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+
+  function run(){
+    var W=num("pW"),Voc=num("pVoc"),Isc=num("pIsc"),Vmp=num("pVmp"),coef=num("pCoef"),fuse=num("pFuse"),N=Math.round(num("pN"));
+    var Vmin=num("sVmin"),Vmax=num("sVmax"),Amax=num("sAmax"),Wmax=num("sWmax"),Wh=num("sWh"),ampsOk=$("sAmpsOk").checked;
+    var tCold=num("wCold"),tHot=num("wHot"),sunW=num("wSunW"),sunS=num("wSunS");
+    var verdict=$("verdict"),table=$("table"),notes=$("notes");
+    if(!(W>0&&Voc>0&&Isc>0&&N>=1&&Vmax>0&&Amax>0&&Wmax>0)){
+      verdict.className="verdict warn";
+      verdict.innerHTML="<h2>Enter your numbers</h2><p>Fill in at least the panel's watts, Voc, Isc and count, plus the battery's highest volts, max amps and max watts.</p>";
+      table.innerHTML=""; notes.innerHTML=""; return;
+    }
+    if(!isFinite(coef)) coef=-0.30;
+    var k=Math.abs(coef)/100;
+    var cC=isFinite(tCold)?fToC(tCold):-10;
+    var coldFactor=cC<25?1+k*(25-cC):1;
+    var cellHot=(isFinite(tHot)?fToC(tHot):35)+25; // panels run ~25°C hotter than the air in full sun
+    var hotFactor=cellHot>25?Math.max(0.5,1-k*(cellHot-25)):1;
+    var VmpOk=isFinite(Vmp)&&Vmp>0;
+
+    var rows=[];
+    for(var s=1;s<=N;s++){for(var p=1;s*p<=N;p++){
+      var vCold=Voc*s*coldFactor, vLabel=Voc*s, amps=Isc*p, watts=W*s*p;
+      var vHot=VmpOk?Vmp*s*hotFactor:NaN;
+      var r={s:s,p:p,n:s*p,vLabel:vLabel,vCold:vCold,amps:amps,watts:watts,vHot:vHot,issues:[],level:"good"};
+      if(vCold>Vmax){r.level="bad"; r.voltBad=true; r.issues.push("Too many volts on a cold morning: can damage the station");}
+      else if(vLabel>Vmax){r.level="bad"; r.voltBad=true;}
+      if(amps>Amax){ if(ampsOk){ if(r.level!=="bad") r.level="warn"; r.issues.push("More amps than the input max; OK only because your manual allows it"); } else { r.level="bad"; r.ampBad=true; r.issues.push("Too many amps for the input"); } }
+      if(isFinite(Vmin)&&VmpOk&&vHot<Vmin){ if(r.level==="good") r.level="warn"; r.issues.push("May be too few volts to charge on hot days"); }
+      if(watts>Wmax&&r.level!=="bad"){ if(r.level==="good") r.level="warn"; r.issues.push("Over the watt limit: the station only takes "+fmt(Wmax)+" W (usually fine; check your manual)"); }
+      if(p>=3){ r.issues.push("Needs an in-line fuse on each panel"); }
+      r.harvest=Math.min(watts*0.75,Wmax); // realistic output after losses, never above the station limit
+      rows.push(r);
+    }}
+    var safe=rows.filter(function(r){return r.level!=="bad"});
+    safe.sort(function(a,b){ return b.harvest-a.harvest || (a.level==="good"?-1:1)-(b.level==="good"?-1:1) || a.n-b.n || b.s-a.s; });
+    var best=safe[0]||null;
+
+    // table
+    var h="<tr><th>Wiring</th><th>Panels used</th><th>Volts (label)</th><th>Volts (cold morning)</th><th>Amps</th><th>Panel watts</th><th>Result</th></tr>";
+    rows.sort(function(a,b){return a.n-b.n||a.s-b.s});
+    rows.forEach(function(r){
+      var name=(r.s===1&&r.p===1)?"1 panel":(r.p===1?r.s+" in series":(r.s===1?r.p+" in parallel":r.s+" in series × "+r.p+" strings"));
+      var pill=r.level==="good"?'<span class="pill good">Safe</span>':(r.level==="warn"?'<span class="pill warn">Works, with a caution</span>':'<span class="pill bad">Don\'t</span>');
+      h+="<tr"+(best&&r===best?' class="best"':"")+"><td>"+name+"</td><td>"+r.n+" of "+N+"</td><td>"+fmt(r.vLabel,1)+" V</td><td>"+fmt(r.vCold,1)+" V</td><td>"+fmt(r.amps,1)+" A</td><td>"+fmt(r.watts)+" W</td><td>"+pill+(r.issues.length?'<div class="help" style="font-size:12px;color:var(--muted);margin-top:3px">'+r.issues.map(esc).join(" · ")+"</div>":"")+"</td></tr>";
+    });
+    table.innerHTML=h;
+
+    // verdict
+    if(!best){
+      verdict.className="verdict bad";
+      verdict.innerHTML="<h2>No safe way to connect these panels</h2><p>Even one panel goes over your station's volt or amp limit. Don't connect them. You'd need panels with a lower Voc or Isc, or a station with a wider solar input.</p>";
+    } else {
+      var winter=best.harvest*(isFinite(sunW)?sunW:0), summer=best.harvest*(isFinite(sunS)?sunS:0);
+      var bestName=(best.s===1&&best.p===1)?"1 panel":(best.p===1?best.s+" panels in series":(best.s===1?best.p+" panels in parallel":best.s+" in series × "+best.p+" strings ("+best.n+" panels)"));
+      verdict.className="verdict "+(best.level==="good"?"good":"warn");
+      var unused=N-best.n;
+      verdict.innerHTML="<h2>Best safe setup: "+bestName+"</h2>"+
+        "<p>"+fmt(best.vCold,1)+" V on a cold morning (limit "+fmt(Vmax)+" V) · "+fmt(best.amps,1)+" A (limit "+fmt(Amax,1)+" A) · "+fmt(best.watts)+" W of panels (limit "+fmt(Wmax)+" W)"+(unused>0?" · <b>"+unused+" panel"+(unused>1?"s":"")+" left over</b>":"")+"</p>"+
+        '<div class="checks">'+
+          chk(best.voltBad?"bad":"good","Cold-morning volts",fmt(best.vCold,1)+" V","Must stay under "+fmt(Vmax)+" V. Label says "+fmt(best.vLabel,1)+" V at 77°F.")+
+          chk(best.amps>Amax?"warn":"good","Amps",fmt(best.amps,1)+" A","Input max is "+fmt(Amax,1)+" A.")+
+          chk(best.watts>Wmax?"warn":"good","Panel watts",fmt(best.watts)+" W","The station takes up to "+fmt(Wmax)+" W. Expect about "+fmt(best.harvest)+" W in real sun.")+
+          chk("info","Clear-day refill","~"+fmt(winter)+" Wh","Winter. Summer: ~"+fmt(summer)+" Wh."+(Wh>0?" That's "+fmt(winter/Wh*100)+"% / "+fmt(summer/Wh*100)+"% of a "+fmt(Wh)+" Wh battery."+(summer>Wh?" Anything over 100% can run your loads while the sun is up.":""):""))+
+        "</div>";
+    }
+
+    // notes
+    var n=[];
+    n.push("Cold-weather voltage: at "+(isFinite(tCold)?fmt(tCold):"14")+"°F, each panel's Voc climbs about "+fmt((coldFactor-1)*100)+"% above its label, to about "+fmt(Voc*coldFactor,1)+" V.");
+    if(best){
+      if(Wh>0&&isFinite(sunW)&&sunW>0){
+        var need=Wh/(sunW*0.75);
+        n.push("To refill your "+fmt(Wh)+" Wh battery once on a clear winter day takes about "+fmt(need)+" W of panels ("+fmt(Wh)+" ÷ ("+fmt(sunW,1)+" sun hours × 0.75))."+(need>Wmax?" That's more than your station can accept, so plan on a generator or a second battery for winter.":""));
+      }
+      n.push("The refill math is panel watts × sun hours × 0.75, never more than the station's max watts × sun hours. The 0.75 covers heat, dust, wiring and charging losses. A cloudy or icy day may give only a tenth to a quarter of that.");
+      if(best.p>=3&&fuse>0){
+        var fmin=Isc*1.56;
+        n.push("With "+best.p+" panels in parallel, put an in-line fuse on each panel: rated at least "+fmt(fmin,1)+" A (1.56 × Isc) and no more than the panel's "+fmt(fuse)+" A max series fuse."+(fmin>fuse?" Those don't overlap, so this panel shouldn't be wired 3 or more in parallel.":""));
+      } else if(best.p>=3){
+        n.push("With "+best.p+" panels in parallel, each panel usually needs an in-line fuse. Look for \"max series fuse\" on the panel label to size it.");
+      } else if(best.p===2){
+        n.push("Two panels in parallel normally don't need fuses. You'll need one MC4 Y-branch pair (one for the pluses, one for the minuses).");
+      }
+      if(best.s>1) n.push("Panels in series need to be the same model. Panels in parallel should have about the same voltage.");
+    }
+    if(!(isFinite(Vmp)&&Vmp>0)) n.push("Add the panel's Vmp to check whether it makes enough volts to start charging on hot days.");
+    notes.innerHTML=n.map(function(t){return "<li>"+esc(t)+"</li>"}).join("");
+  }
+  function chk(level,lbl,big,what){return '<div class="chk '+level+'"><div class="lbl">'+esc(lbl)+'</div><div class="big">'+esc(big)+'</div><div class="what">'+esc(what)+'</div></div>'}
+
+  ids.forEach(function(k){ $(k).addEventListener("input",run); $(k).addEventListener("change",run); });
+  $("btnExample").addEventListener("click",function(){fill(EXAMPLE)});
+  $("btnBlank").addEventListener("click",function(){var b={};ids.forEach(function(k){b[k]=(k==="sAmpsOk"?false:"")}); b.pCoef=-0.30; b.pN=1; b.wCold=10; b.wHot=95; fill(b);});
+  fill(EXAMPLE);
+})();
+</script>
+</body>
+</html>
